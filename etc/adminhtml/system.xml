@@ -1,0 +1,93 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Aeqet UCP Admin System Configuration
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <tab id="aeqet" translate="label" sortOrder="500">
+            <label>Aeqet</label>
+        </tab>
+
+        <section id="aeqet_ucp" translate="label" type="text" sortOrder="10"
+                 showInDefault="1" showInWebsite="1" showInStore="1">
+            <label>UCP Settings</label>
+            <tab>aeqet</tab>
+            <resource>Aeqet_Ucp::config</resource>
+
+            <!-- General Settings -->
+            <group id="general" translate="label" type="text" sortOrder="10"
+                   showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>General Settings</label>
+
+                <field id="enabled" translate="label comment" type="select" sortOrder="10"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Enable UCP Module</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>Enable or disable the UCP API endpoints.</comment>
+                </field>
+            </group>
+
+            <!-- Manifest Settings -->
+            <group id="manifest" translate="label" type="text" sortOrder="20"
+                   showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Manifest Settings</label>
+
+                <field id="base_url" translate="label comment" type="text" sortOrder="10"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Base URL Override</label>
+                    <comment>Override the store base URL in the UCP manifest.</comment>
+                </field>
+
+                <field id="api_endpoint" translate="label comment" type="text" sortOrder="20"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>API Endpoint Path</label>
+                    <comment>REST API base path for UCP endpoints. Default: rest/V1/ucp</comment>
+                </field>
+            </group>
+
+            <!-- Capabilities Settings -->
+            <group id="capabilities" translate="label" type="text" sortOrder="30"
+                   showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Capabilities</label>
+                <comment>Enable or disable specific UCP capabilities in the manifest.</comment>
+
+                <field id="checkout" translate="label comment" type="select" sortOrder="10"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Checkout Capability</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>Enable checkout session and cart capabilities.</comment>
+                </field>
+
+                <field id="catalog" translate="label comment" type="select" sortOrder="20"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Catalog Capability</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>Enable product and category catalog capabilities.</comment>
+                </field>
+            </group>
+
+            <!-- Payment Settings -->
+            <group id="payment" translate="label" type="text" sortOrder="40"
+                   showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Payment Settings</label>
+
+                <field id="handler_type" translate="label comment" type="select" sortOrder="10"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Payment Handler Type</label>
+                    <source_model>Aeqet\Ucp\Model\Config\Source\PaymentHandlerType</source_model>
+                    <comment>Select the payment handling method for UCP checkouts.</comment>
+                </field>
+
+                <field id="handler_name" translate="label comment" type="text" sortOrder="20"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Payment Handler Name</label>
+                    <comment>Display name for the payment handler in the manifest.</comment>
+                </field>
+            </group>
+
+        </section>
+    </system>
+</config>

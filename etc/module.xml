@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Aeqet UCP Module Configuration
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Module/etc/module.xsd">
+    <module name="Aeqet_Ucp">
+        <sequence>
+            <module name="Magento_Quote"/>
+            <module name="Magento_Sales"/>
+            <module name="Magento_Webapi"/>
+        </sequence>
+    </module>
+</config>

@@ -1,0 +1,178 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Aeqet UCP Web API Configuration
+ *
+ * Checkout Session Endpoints:
+ * - POST   /V1/ucp/checkout           - Create session from cart
+ * - GET    /V1/ucp/checkout/:sessionId - Get session
+ * - PUT    /V1/ucp/checkout/:sessionId - Update session
+ * - POST   /V1/ucp/checkout/:sessionId/complete - Complete and create order
+ * - DELETE /V1/ucp/checkout/:sessionId - Cancel session
+ *
+ * Catalog Product Endpoints:
+ * - GET    /V1/ucp/products           - Search products
+ * - GET    /V1/ucp/products/:productId - Get product by ID
+ * - GET    /V1/ucp/products/sku/:sku  - Get product by SKU
+ *
+ * Catalog Category Endpoints:
+ * - GET    /V1/ucp/categories         - Get category tree
+ * - GET    /V1/ucp/categories/:categoryId - Get category by ID
+ * - GET    /V1/ucp/categories/:categoryId/products - Get products in category
+ *
+ * Cart Endpoints:
+ * - POST   /V1/ucp/cart               - Create new cart
+ * - GET    /V1/ucp/cart/:cartId       - Get cart by ID
+ * - POST   /V1/ucp/cart/:cartId/items - Add item to cart
+ * - PUT    /V1/ucp/cart/:cartId/items/:itemId - Update item quantity
+ * - DELETE /V1/ucp/cart/:cartId/items/:itemId - Remove item from cart
+ */
+-->
+<routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Webapi:etc/webapi.xsd">
+
+    <!-- ======================= -->
+    <!-- CHECKOUT SESSION ROUTES -->
+    <!-- ======================= -->
+
+    <!-- Create Checkout Session -->
+    <route url="/V1/ucp/checkout" method="POST">
+        <service class="Aeqet\Ucp\Api\CheckoutSessionManagementInterface" method="create"/>
+        <resources>
+            <resource ref="anonymous"/>
+        </resources>
+    </route>
+
+    <!-- Get Checkout Session -->
+    <route url="/V1/ucp/checkout/:sessionId" method="GET">
+        <service class="Aeqet\Ucp\Api\CheckoutSessionManagementInterface" method="get"/>
+        <resources>
+            <resource ref="anonymous"/>
+        </resources>
+    </route>
+
+    <!-- Update Checkout Session -->
+    <route url="/V1/ucp/checkout/:sessionId" method="PUT">
+        <service class="Aeqet\Ucp\Api\CheckoutSessionManagementInterface" method="update"/>
+        <resources>
+            <resource ref="anonymous"/>
+        </resources>
+    </route>
+
+    <!-- Complete Checkout Session -->
+    <route url="/V1/ucp/checkout/:sessionId/complete" method="POST">
+        <service class="Aeqet\Ucp\Api\CheckoutSessionManagementInterface" method="complete"/>
+        <resources>
+            <resource ref="anonymous"/>
+        </resources>
+    </route>
+
+    <!-- Cancel Checkout Session -->
+    <route url="/V1/ucp/checkout/:sessionId" method="DELETE">
+        <service class="Aeqet\Ucp\Api\CheckoutSessionManagementInterface" method="cancel"/>
+        <resources>
+            <resource ref="anonymous"/>
+        </resources>
+    </route>
+
+    <!-- ======================= -->
+    <!-- CATALOG PRODUCT ROUTES  -->
+    <!-- ======================= -->
+
+    <!-- Search Products -->
+    <route url="/V1/ucp/products" method="GET">
+        <service class="Aeqet\Ucp\Api\CatalogProductManagementInterface" method="search"/>
+        <resources>
+            <resource ref="anonymous"/>
+        </resources>
+    </route>
+
+    <!-- Get Product by ID -->
+    <route url="/V1/ucp/products/:productId" method="GET">
+        <service class="Aeqet\Ucp\Api\CatalogProductManagementInterface" method="get"/>
+        <resources>
+            <resource ref="anonymous"/>
+        </resources>
+    </route>
+
+    <!-- Get Product by SKU -->
+    <route url="/V1/ucp/products/sku/:sku" method="GET">
+        <service class="Aeqet\Ucp\Api\CatalogProductManagementInterface" method="getBySku"/>
+        <resources>
+            <resource ref="anonymous"/>
+        </resources>
+    </route>
+
+    <!-- ======================== -->
+    <!-- CATALOG CATEGORY ROUTES  -->
+    <!-- ======================== -->
+
+    <!-- Get Category Tree -->
+    <route url="/V1/ucp/categories" method="GET">
+        <service class="Aeqet\Ucp\Api\CatalogCategoryManagementInterface" method="getTree"/>
+        <resources>
+            <resource ref="anonymous"/>
+        </resources>
+    </route>
+
+    <!-- Get Category by ID -->
+    <route url="/V1/ucp/categories/:categoryId" method="GET">
+        <service class="Aeqet\Ucp\Api\CatalogCategoryManagementInterface" method="get"/>
+        <resources>
+            <resource ref="anonymous"/>
+        </resources>
+    </route>
+
+    <!-- Get Products in Category -->
+    <route url="/V1/ucp/categories/:categoryId/products" method="GET">
+        <service class="Aeqet\Ucp\Api\CatalogCategoryManagementInterface" method="getProducts"/>
+        <resources>
+            <resource ref="anonymous"/>
+        </resources>
+    </route>
+
+    <!-- ============= -->
+    <!-- CART ROUTES   -->
+    <!-- ============= -->
+
+    <!-- Create Cart -->
+    <route url="/V1/ucp/cart" method="POST">
+        <service class="Aeqet\Ucp\Api\CartManagementInterface" method="create"/>
+        <resources>
+            <resource ref="anonymous"/>
+        </resources>
+    </route>
+
+    <!-- Get Cart -->
+    <route url="/V1/ucp/cart/:cartId" method="GET">
+        <service class="Aeqet\Ucp\Api\CartManagementInterface" method="get"/>
+        <resources>
+            <resource ref="anonymous"/>
+        </resources>
+    </route>
+
+    <!-- Add Item to Cart -->
+    <route url="/V1/ucp/cart/:cartId/items" method="POST">
+        <service class="Aeqet\Ucp\Api\CartManagementInterface" method="addItem"/>
+        <resources>
+            <resource ref="anonymous"/>
+        </resources>
+    </route>
+
+    <!-- Update Item Quantity -->
+    <route url="/V1/ucp/cart/:cartId/items/:itemId" method="PUT">
+        <service class="Aeqet\Ucp\Api\CartManagementInterface" method="updateItem"/>
+        <resources>
+            <resource ref="anonymous"/>
+        </resources>
+    </route>
+
+    <!-- Remove Item from Cart -->
+    <route url="/V1/ucp/cart/:cartId/items/:itemId" method="DELETE">
+        <service class="Aeqet\Ucp\Api\CartManagementInterface" method="removeItem"/>
+        <resources>
+            <resource ref="anonymous"/>
+        </resources>
+    </route>
+
+</routes>

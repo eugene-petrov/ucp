@@ -1,0 +1,1669 @@
+{
+	"info": {
+		"_postman_id": "aeqet-ucp-checkout-flow",
+		"name": "Aeqet UCP Checkout Flow",
+		"description": "Complete test flow for Aeqet_Ucp module.\n\n## Flow:\n1. Catalog: Search products, get categories\n2. Cart: Create cart, add items via UCP API\n3. Checkout: Create UCP session and complete order\n\n## Capabilities:\n- dev.ucp.shopping.checkout - Checkout flow\n- dev.ucp.shopping.catalog - Product/category browsing\n\n## Setup:\n1. Set `base_url` variable to your Magento instance\n2. Ensure you have products in catalog",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "1. Catalog - Products",
+			"item": [
+				{
+					"name": "1.1 Search Products",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Search results returned\", function () {",
+									"    pm.expect(jsonData.products).to.be.an('array');",
+									"    pm.expect(jsonData.total_count).to.be.a('number');",
+									"    pm.expect(jsonData.page_size).to.be.a('number');",
+									"    pm.expect(jsonData.current_page).to.be.a('number');",
+									"    pm.expect(jsonData.total_pages).to.be.a('number');",
+									"});",
+									"",
+									"if (jsonData.products.length > 0) {",
+									"    pm.collectionVariables.set(\"catalog_product_id\", jsonData.products[0].id);",
+									"    pm.collectionVariables.set(\"catalog_product_sku\", jsonData.products[0].sku);",
+									"    ",
+									"    pm.test(\"Product has correct structure\", function () {",
+									"        var product = jsonData.products[0];",
+									"        pm.expect(product.id).to.match(/^product_/);",
+									"        pm.expect(product.sku).to.be.a('string');",
+									"        pm.expect(product.title).to.be.a('string');",
+									"        pm.expect(product.price).to.be.a('number');",
+									"        pm.expect(product.currency).to.be.a('string');",
+									"        pm.expect(product.url).to.be.a('string');",
+									"        pm.expect(product.in_stock).to.be.a('boolean');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/rest/V1/ucp/products?query=&limit=10&offset=0",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"rest",
+								"V1",
+								"ucp",
+								"products"
+							],
+							"query": [
+								{
+									"key": "query",
+									"value": ""
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								},
+								{
+									"key": "offset",
+									"value": "0"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "1.2 Search Products with Query",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Search results structure valid\", function () {",
+									"    pm.expect(jsonData.products).to.be.an('array');",
+									"    pm.expect(jsonData.total_count).to.be.a('number');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/rest/V1/ucp/products?query=shirt&limit=5",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"rest",
+								"V1",
+								"ucp",
+								"products"
+							],
+							"query": [
+								{
+									"key": "query",
+									"value": "shirt"
+								},
+								{
+									"key": "limit",
+									"value": "5"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "1.3 Get Product by ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Product returned with correct structure\", function () {",
+									"    pm.expect(jsonData.id).to.eql(pm.collectionVariables.get(\"catalog_product_id\"));",
+									"    pm.expect(jsonData.sku).to.be.a('string');",
+									"    pm.expect(jsonData.title).to.be.a('string');",
+									"    pm.expect(jsonData.price).to.be.a('number');",
+									"    pm.expect(jsonData.currency).to.be.a('string');",
+									"    pm.expect(jsonData.images).to.be.an('array');",
+									"    pm.expect(jsonData.url).to.be.a('string');",
+									"    pm.expect(jsonData.in_stock).to.be.a('boolean');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/rest/V1/ucp/products/{{catalog_product_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"rest",
+								"V1",
+								"ucp",
+								"products",
+								"{{catalog_product_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "1.4 Get Product by SKU",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Product returned by SKU\", function () {",
+									"    pm.expect(jsonData.sku).to.eql(pm.collectionVariables.get(\"catalog_product_sku\"));",
+									"    pm.expect(jsonData.id).to.match(/^product_/);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/rest/V1/ucp/products/sku/{{catalog_product_sku}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"rest",
+								"V1",
+								"ucp",
+								"products",
+								"sku",
+								"{{catalog_product_sku}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "2. Catalog - Categories",
+			"item": [
+				{
+					"name": "2.1 Get Category Tree",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Categories returned as array\", function () {",
+									"    pm.expect(jsonData).to.be.an('array');",
+									"});",
+									"",
+									"if (jsonData.length > 0) {",
+									"    pm.collectionVariables.set(\"category_id\", jsonData[0].id);",
+									"    ",
+									"    pm.test(\"Category has correct structure\", function () {",
+									"        var category = jsonData[0];",
+									"        pm.expect(category.id).to.match(/^category_/);",
+									"        pm.expect(category.name).to.be.a('string');",
+									"        pm.expect(category.url).to.be.a('string');",
+									"        pm.expect(category.level).to.be.a('number');",
+									"        pm.expect(category.product_count).to.be.a('number');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/rest/V1/ucp/categories?depth=3",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"rest",
+								"V1",
+								"ucp",
+								"categories"
+							],
+							"query": [
+								{
+									"key": "depth",
+									"value": "3"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "2.2 Get Category by ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Category returned with correct structure\", function () {",
+									"    pm.expect(jsonData.id).to.eql(pm.collectionVariables.get(\"category_id\"));",
+									"    pm.expect(jsonData.name).to.be.a('string');",
+									"    pm.expect(jsonData.url).to.be.a('string');",
+									"    pm.expect(jsonData.level).to.be.a('number');",
+									"    pm.expect(jsonData.product_count).to.be.a('number');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/rest/V1/ucp/categories/{{category_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"rest",
+								"V1",
+								"ucp",
+								"categories",
+								"{{category_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "2.3 Get Products in Category",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Products search results returned\", function () {",
+									"    pm.expect(jsonData.products).to.be.an('array');",
+									"    pm.expect(jsonData.total_count).to.be.a('number');",
+									"    pm.expect(jsonData.page_size).to.be.a('number');",
+									"    pm.expect(jsonData.current_page).to.be.a('number');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/rest/V1/ucp/categories/{{category_id}}/products?limit=10&offset=0",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"rest",
+								"V1",
+								"ucp",
+								"categories",
+								"{{category_id}}",
+								"products"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "10"
+								},
+								{
+									"key": "offset",
+									"value": "0"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "3. UCP Cart",
+			"item": [
+				{
+					"name": "3.1 Create UCP Cart",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Cart created with correct structure\", function () {",
+									"    pm.expect(jsonData.id).to.match(/^cart_/);",
+									"    pm.expect(jsonData.items).to.be.an('array');",
+									"    pm.expect(jsonData.totals).to.be.an('array');",
+									"    pm.expect(jsonData.currency).to.be.a('string');",
+									"    pm.expect(jsonData.item_count).to.be.a('number');",
+									"});",
+									"",
+									"pm.collectionVariables.set(\"ucp_cart_id\", jsonData.id);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{base_url}}/rest/V1/ucp/cart",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"rest",
+								"V1",
+								"ucp",
+								"cart"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "3.2 Add Item to Cart",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Item added to cart\", function () {",
+									"    pm.expect(jsonData.items).to.be.an('array');",
+									"    pm.expect(jsonData.items.length).to.be.greaterThan(0);",
+									"    pm.expect(jsonData.item_count).to.be.greaterThan(0);",
+									"});",
+									"",
+									"if (jsonData.items.length > 0) {",
+									"    pm.collectionVariables.set(\"ucp_cart_item_id\", jsonData.items[0].id);",
+									"    ",
+									"    pm.test(\"Cart item has correct structure\", function () {",
+									"        var item = jsonData.items[0];",
+									"        pm.expect(item.id).to.match(/^item_/);",
+									"        pm.expect(item.product).to.be.an('object');",
+									"        pm.expect(item.product.id).to.match(/^product_/);",
+									"        pm.expect(item.quantity).to.be.a('number');",
+									"        pm.expect(item.price).to.be.a('number');",
+									"        pm.expect(item.subtotal).to.be.a('number');",
+									"    });",
+									"}",
+									"",
+									"pm.test(\"Cart totals updated\", function () {",
+									"    pm.expect(jsonData.totals).to.be.an('array');",
+									"    var totalTypes = jsonData.totals.map(t => t.type);",
+									"    pm.expect(totalTypes).to.include('subtotal');",
+									"    pm.expect(totalTypes).to.include('total');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"productId\": \"{{catalog_product_id}}\",\n    \"quantity\": 2\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/rest/V1/ucp/cart/{{ucp_cart_id}}/items",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"rest",
+								"V1",
+								"ucp",
+								"cart",
+								"{{ucp_cart_id}}",
+								"items"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "3.3 Get UCP Cart",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Cart returned with items\", function () {",
+									"    pm.expect(jsonData.id).to.eql(pm.collectionVariables.get(\"ucp_cart_id\"));",
+									"    pm.expect(jsonData.items).to.be.an('array');",
+									"    pm.expect(jsonData.items.length).to.be.greaterThan(0);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/rest/V1/ucp/cart/{{ucp_cart_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"rest",
+								"V1",
+								"ucp",
+								"cart",
+								"{{ucp_cart_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "3.4 Update Item Quantity",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Item quantity updated\", function () {",
+									"    var item = jsonData.items.find(i => i.id === pm.collectionVariables.get(\"ucp_cart_item_id\"));",
+									"    pm.expect(item.quantity).to.eql(3);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"quantity\": 3\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/rest/V1/ucp/cart/{{ucp_cart_id}}/items/{{ucp_cart_item_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"rest",
+								"V1",
+								"ucp",
+								"cart",
+								"{{ucp_cart_id}}",
+								"items",
+								"{{ucp_cart_item_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "3.5 Remove Item from Cart",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Item removed from cart\", function () {",
+									"    var item = jsonData.items.find(i => i.id === pm.collectionVariables.get(\"ucp_cart_item_id\"));",
+									"    pm.expect(item).to.be.undefined;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/rest/V1/ucp/cart/{{ucp_cart_id}}/items/{{ucp_cart_item_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"rest",
+								"V1",
+								"ucp",
+								"cart",
+								"{{ucp_cart_id}}",
+								"items",
+								"{{ucp_cart_item_id}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "4. Full AI Agent Flow (UCP Only)",
+			"item": [
+				{
+					"name": "4.1 Search for Product",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"if (jsonData.products.length > 0) {",
+									"    pm.collectionVariables.set(\"agent_product_id\", jsonData.products[0].id);",
+									"    console.log(\"Found product: \" + jsonData.products[0].title + \" (\" + jsonData.products[0].id + \")\");",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/rest/V1/ucp/products?limit=1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"rest",
+								"V1",
+								"ucp",
+								"products"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "4.2 Create Cart",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.collectionVariables.set(\"agent_cart_id\", jsonData.id);",
+									"// Extract masked ID for checkout",
+									"var maskedId = jsonData.id.replace('cart_', '');",
+									"pm.collectionVariables.set(\"agent_cart_masked_id\", maskedId);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{base_url}}/rest/V1/ucp/cart",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"rest",
+								"V1",
+								"ucp",
+								"cart"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "4.3 Add Product to Cart",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Product added to cart\", function () {",
+									"    pm.expect(jsonData.items.length).to.be.greaterThan(0);",
+									"});",
+									"",
+									"console.log(\"Cart total: \" + jsonData.totals.find(t => t.type === 'total').amount + \" cents\");"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"productId\": \"{{agent_product_id}}\",\n    \"quantity\": 1\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/rest/V1/ucp/cart/{{agent_cart_id}}/items",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"rest",
+								"V1",
+								"ucp",
+								"cart",
+								"{{agent_cart_id}}",
+								"items"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "4.4 Set Shipping (Magento API)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"if (jsonData.length > 0) {",
+									"    pm.collectionVariables.set(\"agent_shipping_carrier\", jsonData[0].carrier_code);",
+									"    pm.collectionVariables.set(\"agent_shipping_method\", jsonData[0].method_code);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"address\": {\n        \"firstname\": \"AI\",\n        \"lastname\": \"Agent\",\n        \"email\": \"ai.agent@example.com\",\n        \"street\": [\"123 AI Street\"],\n        \"city\": \"San Francisco\",\n        \"region_id\": 12,\n        \"region_code\": \"CA\",\n        \"country_id\": \"US\",\n        \"postcode\": \"94105\",\n        \"telephone\": \"+14155551234\"\n    }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/rest/V1/guest-carts/{{agent_cart_masked_id}}/estimate-shipping-methods",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"rest",
+								"V1",
+								"guest-carts",
+								"{{agent_cart_masked_id}}",
+								"estimate-shipping-methods"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "4.5 Set Shipping Info (Magento API)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Payment methods available\", function () {",
+									"    pm.expect(jsonData.payment_methods).to.be.an('array');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"addressInformation\": {\n        \"shipping_address\": {\n            \"firstname\": \"AI\",\n            \"lastname\": \"Agent\",\n            \"email\": \"ai.agent@example.com\",\n            \"street\": [\"123 AI Street\"],\n            \"city\": \"San Francisco\",\n            \"region_id\": 12,\n            \"region_code\": \"CA\",\n            \"country_id\": \"US\",\n            \"postcode\": \"94105\",\n            \"telephone\": \"+14155551234\"\n        },\n        \"billing_address\": {\n            \"firstname\": \"AI\",\n            \"lastname\": \"Agent\",\n            \"email\": \"ai.agent@example.com\",\n            \"street\": [\"123 AI Street\"],\n            \"city\": \"San Francisco\",\n            \"region_id\": 12,\n            \"region_code\": \"CA\",\n            \"country_id\": \"US\",\n            \"postcode\": \"94105\",\n            \"telephone\": \"+14155551234\"\n        },\n        \"shipping_carrier_code\": \"{{agent_shipping_carrier}}\",\n        \"shipping_method_code\": \"{{agent_shipping_method}}\"\n    }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/rest/V1/guest-carts/{{agent_cart_masked_id}}/shipping-information",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"rest",
+								"V1",
+								"guest-carts",
+								"{{agent_cart_masked_id}}",
+								"shipping-information"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "4.6 Create UCP Checkout Session",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"UCP Session created\", function () {",
+									"    pm.expect(jsonData.id).to.match(/^ucp_/);",
+									"});",
+									"",
+									"pm.collectionVariables.set(\"agent_ucp_session_id\", jsonData.id);",
+									"",
+									"pm.test(\"Has both capabilities\", function () {",
+									"    var capNames = jsonData.ucp.capabilities.map(c => c.name);",
+									"    pm.expect(capNames).to.include('dev.ucp.shopping.checkout');",
+									"    pm.expect(capNames).to.include('dev.ucp.shopping.catalog');",
+									"});",
+									"",
+									"console.log(\"UCP Session: \" + jsonData.id);",
+									"console.log(\"Status: \" + jsonData.status);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"cartId\": \"{{agent_cart_masked_id}}\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/rest/V1/ucp/checkout",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"rest",
+								"V1",
+								"ucp",
+								"checkout"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "4.7 Complete Checkout",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Order completed\", function () {",
+									"    pm.expect(jsonData.status).to.eql('completed');",
+									"    pm.expect(jsonData.order).to.be.an('object');",
+									"    pm.expect(jsonData.order.id).to.be.a('string');",
+									"});",
+									"",
+									"console.log(\"ORDER CREATED: #\" + jsonData.order.id);",
+									"pm.collectionVariables.set(\"agent_order_id\", jsonData.order.id);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{}"
+						},
+						"url": {
+							"raw": "{{base_url}}/rest/V1/ucp/checkout/{{agent_ucp_session_id}}/complete",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"rest",
+								"V1",
+								"ucp",
+								"checkout",
+								"{{agent_ucp_session_id}}",
+								"complete"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "5. Legacy Checkout Flow",
+			"item": [
+				{
+					"name": "5.1 Create Guest Cart",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"pm.collectionVariables.set(\"cart_id\", jsonData);",
+									"",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Cart ID is returned\", function () {",
+									"    pm.expect(jsonData).to.be.a('string');",
+									"    pm.expect(jsonData.length).to.be.greaterThan(10);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{base_url}}/rest/V1/guest-carts",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"rest",
+								"V1",
+								"guest-carts"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "5.2 Add Product to Cart",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Item added successfully\", function () {",
+									"    pm.expect(jsonData.item_id).to.be.a('number');",
+									"    pm.expect(jsonData.sku).to.eql(pm.collectionVariables.get(\"product_sku\"));",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"cartItem\": {\n        \"sku\": \"{{product_sku}}\",\n        \"qty\": 2,\n        \"quote_id\": \"{{cart_id}}\"\n    }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/rest/V1/guest-carts/{{cart_id}}/items",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"rest",
+								"V1",
+								"guest-carts",
+								"{{cart_id}}",
+								"items"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "5.3 Set Shipping Address",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Shipping methods returned\", function () {",
+									"    pm.expect(jsonData).to.be.an('array');",
+									"});",
+									"",
+									"if (jsonData.length > 0) {",
+									"    pm.collectionVariables.set(\"shipping_carrier_code\", jsonData[0].carrier_code);",
+									"    pm.collectionVariables.set(\"shipping_method_code\", jsonData[0].method_code);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"address\": {\n        \"firstname\": \"John\",\n        \"lastname\": \"Doe\",\n        \"email\": \"john.doe@example.com\",\n        \"street\": [\"123 Main Street\"],\n        \"city\": \"Los Angeles\",\n        \"region_id\": 12,\n        \"region_code\": \"CA\",\n        \"region\": \"California\",\n        \"country_id\": \"US\",\n        \"postcode\": \"90001\",\n        \"telephone\": \"+14155552671\"\n    }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/rest/V1/guest-carts/{{cart_id}}/estimate-shipping-methods",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"rest",
+								"V1",
+								"guest-carts",
+								"{{cart_id}}",
+								"estimate-shipping-methods"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "5.4 Set Shipping Information",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Payment methods returned\", function () {",
+									"    pm.expect(jsonData.payment_methods).to.be.an('array');",
+									"});",
+									"",
+									"pm.test(\"Totals returned\", function () {",
+									"    pm.expect(jsonData.totals).to.be.an('object');",
+									"    pm.expect(jsonData.totals.grand_total).to.be.a('number');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"addressInformation\": {\n        \"shipping_address\": {\n            \"firstname\": \"John\",\n            \"lastname\": \"Doe\",\n            \"email\": \"john.doe@example.com\",\n            \"street\": [\"123 Main Street\"],\n            \"city\": \"Los Angeles\",\n            \"region_id\": 12,\n            \"region_code\": \"CA\",\n            \"region\": \"California\",\n            \"country_id\": \"US\",\n            \"postcode\": \"90001\",\n            \"telephone\": \"+14155552671\"\n        },\n        \"billing_address\": {\n            \"firstname\": \"John\",\n            \"lastname\": \"Doe\",\n            \"email\": \"john.doe@example.com\",\n            \"street\": [\"123 Main Street\"],\n            \"city\": \"Los Angeles\",\n            \"region_id\": 12,\n            \"region_code\": \"CA\",\n            \"region\": \"California\",\n            \"country_id\": \"US\",\n            \"postcode\": \"90001\",\n            \"telephone\": \"+14155552671\"\n        },\n        \"shipping_carrier_code\": \"{{shipping_carrier_code}}\",\n        \"shipping_method_code\": \"{{shipping_method_code}}\"\n    }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/rest/V1/guest-carts/{{cart_id}}/shipping-information",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"rest",
+								"V1",
+								"guest-carts",
+								"{{cart_id}}",
+								"shipping-information"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "5.5 Create UCP Session",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"UCP Session ID returned\", function () {",
+									"    pm.expect(jsonData.id).to.match(/^ucp_/);",
+									"});",
+									"",
+									"pm.collectionVariables.set(\"ucp_session_id\", jsonData.id);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"cartId\": \"{{cart_id}}\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/rest/V1/ucp/checkout",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"rest",
+								"V1",
+								"ucp",
+								"checkout"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "5.6 Complete UCP Session",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Status is completed\", function () {",
+									"    pm.expect(jsonData.status).to.eql('completed');",
+									"});",
+									"",
+									"pm.test(\"Order confirmation returned\", function () {",
+									"    pm.expect(jsonData.order).to.be.an('object');",
+									"    pm.expect(jsonData.order.id).to.be.a('string');",
+									"});",
+									"",
+									"pm.collectionVariables.set(\"order_id\", jsonData.order.id);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{}"
+						},
+						"url": {
+							"raw": "{{base_url}}/rest/V1/ucp/checkout/{{ucp_session_id}}/complete",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"rest",
+								"V1",
+								"ucp",
+								"checkout",
+								"{{ucp_session_id}}",
+								"complete"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "6. Error Cases",
+			"item": [
+				{
+					"name": "6.1 Get Non-Existent Product",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 404 or 500\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([404, 500]);",
+									"});",
+									"",
+									"pm.test(\"Error message returned\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.message).to.be.a('string');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/rest/V1/ucp/products/product_999999999",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"rest",
+								"V1",
+								"ucp",
+								"products",
+								"product_999999999"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "6.2 Get Non-Existent Category",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 404 or 500\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([404, 500]);",
+									"});",
+									"",
+									"pm.test(\"Error message returned\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.message).to.be.a('string');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/rest/V1/ucp/categories/category_999999999",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"rest",
+								"V1",
+								"ucp",
+								"categories",
+								"category_999999999"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "6.3 Get Non-Existent Cart",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 404 or 500\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([404, 500]);",
+									"});",
+									"",
+									"pm.test(\"Error message returned\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.message).to.be.a('string');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/rest/V1/ucp/cart/cart_nonexistent123",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"rest",
+								"V1",
+								"ucp",
+								"cart",
+								"cart_nonexistent123"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "6.4 Get Non-Existent UCP Session",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 404 or 500\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([404, 500]);",
+									"});",
+									"",
+									"pm.test(\"Error message returned\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.message).to.be.a('string');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/rest/V1/ucp/checkout/ucp_nonexistent123",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"rest",
+								"V1",
+								"ucp",
+								"checkout",
+								"ucp_nonexistent123"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost",
+			"type": "string"
+		},
+		{
+			"key": "product_sku",
+			"value": "24-MB01",
+			"type": "string"
+		},
+		{
+			"key": "cart_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "ucp_session_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "order_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "shipping_carrier_code",
+			"value": "flatrate",
+			"type": "string"
+		},
+		{
+			"key": "shipping_method_code",
+			"value": "flatrate",
+			"type": "string"
+		},
+		{
+			"key": "catalog_product_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "catalog_product_sku",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "category_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "ucp_cart_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "ucp_cart_item_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "agent_product_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "agent_cart_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "agent_cart_masked_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "agent_shipping_carrier",
+			"value": "flatrate",
+			"type": "string"
+		},
+		{
+			"key": "agent_shipping_method",
+			"value": "flatrate",
+			"type": "string"
+		},
+		{
+			"key": "agent_ucp_session_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "agent_order_id",
+			"value": "",
+			"type": "string"
+		}
+	]
+}

@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Aeqet UCP Default Configuration Values
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+    <default>
+        <aeqet_ucp>
+            <general>
+                <enabled>1</enabled>
+            </general>
+            <manifest>
+                <!-- Base URL: empty means use store base URL -->
+                <base_url></base_url>
+                <!-- API endpoint path relative to base URL -->
+                <api_endpoint>rest/V1/ucp</api_endpoint>
+            </manifest>
+            <capabilities>
+                <checkout>1</checkout>
+                <catalog>1</catalog>
+            </capabilities>
+            <payment>
+                <handler_type>delegated</handler_type>
+                <handler_name>Merchant Checkout</handler_name>
+            </payment>
+        </aeqet_ucp>
+    </default>
+</config>

@@ -1,0 +1,136 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Aeqet UCP Dependency Injection Configuration
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+
+    <!-- Service Interface Preferences -->
+    <preference for="Aeqet\Ucp\Api\ManifestGeneratorInterface"
+                type="Aeqet\Ucp\Model\Manifest\Generator"/>
+    <preference for="Aeqet\Ucp\Api\CheckoutSessionManagementInterface"
+                type="Aeqet\Ucp\Model\CheckoutSessionManagement"/>
+    <preference for="Aeqet\Ucp\Api\CatalogProductManagementInterface"
+                type="Aeqet\Ucp\Model\CatalogProductManagement"/>
+    <preference for="Aeqet\Ucp\Api\CatalogCategoryManagementInterface"
+                type="Aeqet\Ucp\Model\CatalogCategoryManagement"/>
+    <preference for="Aeqet\Ucp\Api\CartManagementInterface"
+                type="Aeqet\Ucp\Model\CartManagement"/>
+
+    <!-- Data Interface Preferences -->
+    <preference for="Aeqet\Ucp\Api\Data\CheckoutSessionInterface"
+                type="Aeqet\Ucp\Model\Data\CheckoutSession"/>
+    <preference for="Aeqet\Ucp\Api\Data\LineItemInterface"
+                type="Aeqet\Ucp\Model\Data\LineItem"/>
+    <preference for="Aeqet\Ucp\Api\Data\ItemDataInterface"
+                type="Aeqet\Ucp\Model\Data\ItemData"/>
+    <preference for="Aeqet\Ucp\Api\Data\TotalInterface"
+                type="Aeqet\Ucp\Model\Data\Total"/>
+    <preference for="Aeqet\Ucp\Api\Data\BuyerInterface"
+                type="Aeqet\Ucp\Model\Data\Buyer"/>
+    <preference for="Aeqet\Ucp\Api\Data\PaymentInterface"
+                type="Aeqet\Ucp\Model\Data\Payment"/>
+    <preference for="Aeqet\Ucp\Api\Data\PaymentHandlerInterface"
+                type="Aeqet\Ucp\Model\Data\PaymentHandler"/>
+    <preference for="Aeqet\Ucp\Api\Data\LinkInterface"
+                type="Aeqet\Ucp\Model\Data\Link"/>
+    <preference for="Aeqet\Ucp\Api\Data\MessageInterface"
+                type="Aeqet\Ucp\Model\Data\Message"/>
+    <preference for="Aeqet\Ucp\Api\Data\UcpMetaInterface"
+                type="Aeqet\Ucp\Model\Data\UcpMeta"/>
+    <preference for="Aeqet\Ucp\Api\Data\CapabilityInterface"
+                type="Aeqet\Ucp\Model\Data\Capability"/>
+    <preference for="Aeqet\Ucp\Api\Data\FulfillmentOptionInterface"
+                type="Aeqet\Ucp\Model\Data\FulfillmentOption"/>
+    <preference for="Aeqet\Ucp\Api\Data\OrderConfirmationInterface"
+                type="Aeqet\Ucp\Model\Data\OrderConfirmation"/>
+
+    <!-- Catalog Data Interface Preferences -->
+    <preference for="Aeqet\Ucp\Api\Data\CatalogImageInterface"
+                type="Aeqet\Ucp\Model\Data\CatalogImage"/>
+    <preference for="Aeqet\Ucp\Api\Data\CatalogProductInterface"
+                type="Aeqet\Ucp\Model\Data\CatalogProduct"/>
+    <preference for="Aeqet\Ucp\Api\Data\CatalogProductSearchResultsInterface"
+                type="Aeqet\Ucp\Model\Data\CatalogProductSearchResults"/>
+    <preference for="Aeqet\Ucp\Api\Data\CatalogCategoryInterface"
+                type="Aeqet\Ucp\Model\Data\CatalogCategory"/>
+
+    <!-- Cart Data Interface Preferences -->
+    <preference for="Aeqet\Ucp\Api\Data\CartInterface"
+                type="Aeqet\Ucp\Model\Data\Cart"/>
+    <preference for="Aeqet\Ucp\Api\Data\CartItemInterface"
+                type="Aeqet\Ucp\Model\Data\CartItem"/>
+
+    <!-- Variant Data Interface Preferences -->
+    <preference for="Aeqet\Ucp\Api\Data\VariantInterface"
+                type="Aeqet\Ucp\Model\Data\Variant"/>
+    <preference for="Aeqet\Ucp\Api\Data\VariantAttributeInterface"
+                type="Aeqet\Ucp\Model\Data\VariantAttribute"/>
+    <preference for="Aeqet\Ucp\Api\Data\CartItemOptionInterface"
+                type="Aeqet\Ucp\Model\Data\CartItemOption"/>
+
+    <!-- Custom Logger for Aeqet_Ucp -->
+    <virtualType name="Aeqet\Ucp\Logger\Handler" type="Magento\Framework\Logger\Handler\Base">
+        <arguments>
+            <argument name="fileName" xsi:type="string">/var/log/aeqet-ucp.log</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="Aeqet\Ucp\Logger\Logger" type="Magento\Framework\Logger\Monolog">
+        <arguments>
+            <argument name="name" xsi:type="string">aeqet_ucp</argument>
+            <argument name="handlers" xsi:type="array">
+                <item name="system" xsi:type="object">Aeqet\Ucp\Logger\Handler</item>
+            </argument>
+        </arguments>
+    </virtualType>
+
+    <!-- Inject Logger into Models -->
+    <type name="Aeqet\Ucp\Model\QuoteToUcpConverter">
+        <arguments>
+            <argument name="logger" xsi:type="object">Aeqet\Ucp\Logger\Logger</argument>
+        </arguments>
+    </type>
+    <type name="Aeqet\Ucp\Model\ProductToUcpConverter">
+        <arguments>
+            <argument name="logger" xsi:type="object">Aeqet\Ucp\Logger\Logger</argument>
+        </arguments>
+    </type>
+    <type name="Aeqet\Ucp\Model\CatalogCategoryManagement">
+        <arguments>
+            <argument name="logger" xsi:type="object">Aeqet\Ucp\Logger\Logger</argument>
+        </arguments>
+    </type>
+    <type name="Aeqet\Ucp\Model\CheckoutSessionManagement">
+        <arguments>
+            <argument name="logger" xsi:type="object">Aeqet\Ucp\Logger\Logger</argument>
+        </arguments>
+    </type>
+    <type name="Aeqet\Ucp\Model\CartManagement">
+        <arguments>
+            <argument name="logger" xsi:type="object">Aeqet\Ucp\Logger\Logger</argument>
+        </arguments>
+    </type>
+    <type name="Aeqet\Ucp\Model\CatalogProductManagement">
+        <arguments>
+            <argument name="logger" xsi:type="object">Aeqet\Ucp\Logger\Logger</argument>
+        </arguments>
+    </type>
+    <type name="Aeqet\Ucp\Console\Command\GenerateManifestCommand">
+        <arguments>
+            <argument name="logger" xsi:type="object">Aeqet\Ucp\Logger\Logger</argument>
+        </arguments>
+    </type>
+
+    <!-- Console Commands -->
+    <type name="Magento\Framework\Console\CommandListInterface">
+        <arguments>
+            <argument name="commands" xsi:type="array">
+                <item name="ucp_manifest_generate" xsi:type="object">
+                    Aeqet\Ucp\Console\Command\GenerateManifestCommand
+                </item>
+            </argument>
+        </arguments>
+    </type>
+</config>
