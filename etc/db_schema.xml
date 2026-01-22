@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+    <table name="aeqet_ucp_checkout_session" resource="default" engine="innodb"
+           comment="UCP Checkout Session Storage">
+        <column xsi:type="int" name="entity_id" unsigned="true" nullable="false" identity="true"
+                comment="Entity ID"/>
+        <column xsi:type="varchar" name="session_id" nullable="false" length="64"
+                comment="Session ID"/>
+        <column xsi:type="int" name="quote_id" unsigned="true" nullable="false"
+                comment="Quote Entity ID"/>
+        <column xsi:type="varchar" name="masked_quote_id" nullable="false" length="32"
+                comment="Masked Quote ID"/>
+        <column xsi:type="varchar" name="status" nullable="false" length="32" default="incomplete"
+                comment="Session Status"/>
+        <column xsi:type="mediumtext" name="ucp_data" nullable="false"
+                comment="JSON Serialized Session Data"/>
+        <column xsi:type="timestamp" name="created_at" on_update="false" nullable="false"
+                default="CURRENT_TIMESTAMP" comment="Created At"/>
+        <column xsi:type="timestamp" name="updated_at" on_update="true" nullable="false"
+                default="CURRENT_TIMESTAMP" comment="Updated At"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="entity_id"/>
+        </constraint>
+        <constraint xsi:type="unique" referenceId="AEQET_UCP_CHECKOUT_SESSION_SESSION_ID">
+            <column name="session_id"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="AEQET_UCP_CHECKOUT_SESSION_QUOTE_ID_QUOTE_ENTITY_ID"
+                    table="aeqet_ucp_checkout_session" column="quote_id"
+                    referenceTable="quote" referenceColumn="entity_id"
+                    onDelete="CASCADE"/>
+        <constraint xsi:type="unique" referenceId="AEQET_UCP_CHECKOUT_SESSION_MASKED_QUOTE_ID">
+            <column name="masked_quote_id"/>
+        </constraint>
+        <index referenceId="AEQET_UCP_CHECKOUT_SESSION_QUOTE_ID" indexType="btree">
+            <column name="quote_id"/>
+        </index>
+        <index referenceId="AEQET_UCP_CHECKOUT_SESSION_STATUS" indexType="btree">
+            <column name="status"/>
+        </index>
+        <index referenceId="AEQET_UCP_CHECKOUT_SESSION_CREATED_AT" indexType="btree">
+            <column name="created_at"/>
+        </index>
+    </table>
+</schema>

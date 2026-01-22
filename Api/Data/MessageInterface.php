@@ -10,6 +10,7 @@ namespace Aeqet\Ucp\Api\Data;
 interface MessageInterface
 {
     public const TYPE_INFO = 'info';
+    public const CONTENT_TYPE_PLAIN = 'text/plain';
 
     /**
      * Get message type

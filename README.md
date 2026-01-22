@@ -22,6 +22,7 @@ This module implements the Google UCP (Universal Commerce Protocol) specificatio
 - **Configurable Products** - Full support for variants and options
 - **Manifest Generation** - Console command to generate UCP manifest at `/.well-known/ucp`
 - **Admin Configuration** - Configure module settings via Magento admin panel
+- **Session Persistence** - Checkout sessions persisted to database with foreign key to quote table
 
 ---
 
@@ -67,16 +68,6 @@ bin/magento ucp:manifest:generate
 This section documents what remains to fully implement the Google Universal Commerce Protocol for Magento 2.
 
 ### Critical (Required for UCP Compliance)
-
-- [ ] **Session Persistence to Database**
-  - Current implementation uses in-memory storage via `CheckoutSessionRepository`
-  - Need to create database table `aeqet_ucp_checkout_session` with fields:
-    - `session_id` (primary key)
-    - `quote_id` (foreign key to `quote`)
-    - `status` (enum: pending, ready, completed, canceled)
-    - `ucp_data` (JSON blob for full session state)
-    - `created_at`, `updated_at` timestamps
-  - Implement `Aeqet\Ucp\Model\ResourceModel\CheckoutSession` and Collection
 
 - [ ] **Signing Keys for Webhook Verification**
   - Generate RSA or ECDSA key pairs for signing webhook payloads

@@ -5,8 +5,7 @@ declare(strict_types=1);
 namespace Aeqet\Ucp\Model\Manifest;
 
 use Aeqet\Ucp\Api\ManifestGeneratorInterface;
-use Magento\Framework\App\Config\ScopeConfigInterface;
-use Magento\Store\Model\ScopeInterface;
+use Aeqet\Ucp\Model\Config\Config;
 use Magento\Store\Model\StoreManagerInterface;
 
 class Generator implements ManifestGeneratorInterface
@@ -15,20 +14,15 @@ class Generator implements ManifestGeneratorInterface
     private const UCP_SPEC_BASE = 'https://ucp.dev/specification/capabilities/';
     private const UCP_SCHEMA_BASE = 'https://ucp.dev/schemas/';
 
-    private const CONFIG_PATH_BASE_URL = 'aeqet_ucp/manifest/base_url';
-    private const CONFIG_PATH_API_ENDPOINT = 'aeqet_ucp/manifest/api_endpoint';
-    private const CONFIG_PATH_CHECKOUT_ENABLED = 'aeqet_ucp/capabilities/checkout';
-    private const CONFIG_PATH_CATALOG_ENABLED = 'aeqet_ucp/capabilities/catalog';
-
     /**
      * Constructor
      *
      * @param StoreManagerInterface $storeManager
-     * @param ScopeConfigInterface $scopeConfig
+     * @param Config $config
      */
     public function __construct(
         private readonly StoreManagerInterface $storeManager,
-        private readonly ScopeConfigInterface $scopeConfig
+        private readonly Config $config
     ) {
     }
 
@@ -68,10 +62,7 @@ class Generator implements ManifestGeneratorInterface
      */
     private function getBaseUrl(): string
     {
-        $configuredUrl = $this->scopeConfig->getValue(
-            self::CONFIG_PATH_BASE_URL,
-            ScopeInterface::SCOPE_STORE
-        );
+        $configuredUrl = $this->config->getBaseUrl();
 
         if (!empty($configuredUrl)) {
             return rtrim($configuredUrl, '/');
@@ -88,16 +79,8 @@ class Generator implements ManifestGeneratorInterface
      */
     private function getApiEndpoint(string $baseUrl): string
     {
-        $configuredEndpoint = $this->scopeConfig->getValue(
-            self::CONFIG_PATH_API_ENDPOINT,
-            ScopeInterface::SCOPE_STORE
-        );
-
-        if (!empty($configuredEndpoint)) {
-            return $baseUrl . '/' . ltrim($configuredEndpoint, '/');
-        }
-
-        return $baseUrl . '/rest/V1/ucp';
+        $apiEndpoint = $this->config->getApiEndpoint();
+        return $baseUrl . '/' . ltrim($apiEndpoint, '/');
     }
 
     /**
@@ -109,12 +92,12 @@ class Generator implements ManifestGeneratorInterface
     {
         $capabilities = [];
 
-        if ($this->isCheckoutEnabled()) {
+        if ($this->config->isCheckoutCapabilityEnabled()) {
             $capabilities[] = $this->createCapability('checkout');
             $capabilities[] = $this->createCapability('cart');
         }
 
-        if ($this->isCatalogEnabled()) {
+        if ($this->config->isCatalogCapabilityEnabled()) {
             $capabilities[] = $this->createCapability('catalog');
         }
 
@@ -138,32 +121,6 @@ class Generator implements ManifestGeneratorInterface
     }
 
     /**
-     * Check if checkout capability is enabled
-     *
-     * @return bool
-     */
-    private function isCheckoutEnabled(): bool
-    {
-        return $this->scopeConfig->isSetFlag(
-            self::CONFIG_PATH_CHECKOUT_ENABLED,
-            ScopeInterface::SCOPE_STORE
-        );
-    }
-
-    /**
-     * Check if catalog capability is enabled
-     *
-     * @return bool
-     */
-    private function isCatalogEnabled(): bool
-    {
-        return $this->scopeConfig->isSetFlag(
-            self::CONFIG_PATH_CATALOG_ENABLED,
-            ScopeInterface::SCOPE_STORE
-        );
-    }
-
-    /**
      * Build payment handlers array for manifest
      *
      * @param string $baseUrl
@@ -173,8 +130,8 @@ class Generator implements ManifestGeneratorInterface
     {
         return [
             [
-                'type' => 'delegated',
-                'name' => 'Merchant Checkout',
+                'type' => $this->config->getPaymentHandlerType(),
+                'name' => $this->config->getPaymentHandlerName(),
                 'url' => $baseUrl . '/checkout',
             ],
         ];

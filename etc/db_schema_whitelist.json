@@ -1,0 +1,25 @@
+{
+    "aeqet_ucp_checkout_session": {
+        "column": {
+            "entity_id": true,
+            "session_id": true,
+            "quote_id": true,
+            "masked_quote_id": true,
+            "status": true,
+            "ucp_data": true,
+            "created_at": true,
+            "updated_at": true
+        },
+        "index": {
+            "AEQET_UCP_CHECKOUT_SESSION_QUOTE_ID": true,
+            "AEQET_UCP_CHECKOUT_SESSION_STATUS": true,
+            "AEQET_UCP_CHECKOUT_SESSION_CREATED_AT": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "AEQET_UCP_CHECKOUT_SESSION_SESSION_ID": true,
+            "AEQET_UCP_CHECKOUT_SESSION_MASKED_QUOTE_ID": true,
+            "AEQET_UCP_CHECKOUT_SESSION_QUOTE_ID_QUOTE_ENTITY_ID": true
+        }
+    }
+}
