@@ -24,6 +24,7 @@
             <payment>
                 <handler_type>delegated</handler_type>
                 <handler_name>Merchant Checkout</handler_name>
+                <default_payment_method>checkmo</default_payment_method>
             </payment>
         </aeqet_ucp>
     </default>

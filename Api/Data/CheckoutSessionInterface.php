@@ -77,9 +77,9 @@ interface CheckoutSessionInterface
     /**
      * Get UCP meta information
      *
-     * @return \Aeqet\Ucp\Api\Data\UcpMetaInterface
+     * @return \Aeqet\Ucp\Api\Data\UcpMetaInterface|null
      */
-    public function getUcp(): UcpMetaInterface;
+    public function getUcp(): ?UcpMetaInterface;
 
     /**
      * Set UCP meta
@@ -137,9 +137,9 @@ interface CheckoutSessionInterface
     /**
      * Get payment information
      *
-     * @return \Aeqet\Ucp\Api\Data\PaymentInterface
+     * @return \Aeqet\Ucp\Api\Data\PaymentInterface|null
      */
-    public function getPayment(): PaymentInterface;
+    public function getPayment(): ?PaymentInterface;
 
     /**
      * Set payment

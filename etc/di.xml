@@ -122,6 +122,16 @@
             <argument name="logger" xsi:type="object">Aeqet\Ucp\Logger\Logger</argument>
         </arguments>
     </type>
+    <type name="Aeqet\Ucp\Model\CheckoutSessionRepository">
+        <arguments>
+            <argument name="logger" xsi:type="object">Aeqet\Ucp\Logger\Logger</argument>
+        </arguments>
+    </type>
+    <type name="Aeqet\Ucp\Model\CheckoutSessionSerializer">
+        <arguments>
+            <argument name="logger" xsi:type="object">Aeqet\Ucp\Logger\Logger</argument>
+        </arguments>
+    </type>
 
     <!-- Console Commands -->
     <type name="Magento\Framework\Console\CommandListInterface">

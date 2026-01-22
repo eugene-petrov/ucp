@@ -83,7 +83,7 @@ class CheckoutSession extends DataObject implements CheckoutSessionInterface
     /**
      * @inheritDoc
      */
-    public function getUcp(): UcpMetaInterface
+    public function getUcp(): ?UcpMetaInterface
     {
         return $this->getData('ucp');
     }
@@ -147,7 +147,7 @@ class CheckoutSession extends DataObject implements CheckoutSessionInterface
     /**
      * @inheritDoc
      */
-    public function getPayment(): PaymentInterface
+    public function getPayment(): ?PaymentInterface
     {
         return $this->getData('payment');
     }

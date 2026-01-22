@@ -86,6 +86,13 @@
                     <label>Payment Handler Name</label>
                     <comment>Display name for the payment handler in the manifest.</comment>
                 </field>
+
+                <field id="default_payment_method" translate="label comment" type="select" sortOrder="30"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Default Payment Method</label>
+                    <source_model>Magento\Payment\Model\Config\Source\Allmethods</source_model>
+                    <comment>Payment method used when completing UCP checkout sessions.</comment>
+                </field>
             </group>
 
         </section>

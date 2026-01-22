@@ -10,13 +10,14 @@ namespace Aeqet\Ucp\Model;
 use Aeqet\Ucp\Api\CheckoutSessionManagementInterface;
 use Aeqet\Ucp\Api\Data\CheckoutSessionInterface;
 use Aeqet\Ucp\Api\Data\OrderConfirmationInterfaceFactory;
+use Aeqet\Ucp\Model\Config\Config;
 use Exception;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
+use Magento\Quote\Api\CartManagementInterface;
 use Magento\Quote\Api\CartRepositoryInterface;
 use Magento\Quote\Model\MaskedQuoteIdToQuoteIdInterface;
 use Magento\Quote\Model\QuoteIdToMaskedQuoteIdInterface;
-use Magento\Quote\Api\CartManagementInterface;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Store\Model\StoreManagerInterface;
 use Psr\Log\LoggerInterface;
@@ -36,6 +37,7 @@ class CheckoutSessionManagement implements CheckoutSessionManagementInterface
      * @param OrderConfirmationInterfaceFactory $orderConfirmationFactory
      * @param StoreManagerInterface $storeManager
      * @param LoggerInterface $logger
+     * @param Config $config
      */
     public function __construct(
         private readonly CartRepositoryInterface $cartRepository,
@@ -47,7 +49,8 @@ class CheckoutSessionManagement implements CheckoutSessionManagementInterface
         private readonly OrderRepositoryInterface $orderRepository,
         private readonly OrderConfirmationInterfaceFactory $orderConfirmationFactory,
         private readonly StoreManagerInterface $storeManager,
-        private readonly LoggerInterface $logger
+        private readonly LoggerInterface $logger,
+        private readonly Config $config
     ) {
     }
 
@@ -232,7 +235,7 @@ class CheckoutSessionManagement implements CheckoutSessionManagementInterface
         $quoteId = $this->maskedQuoteIdToQuoteId->execute($maskedId);
         $quote = $this->cartRepository->get($quoteId);
 
-        $quote->getPayment()->setMethod('checkmo');
+        $quote->getPayment()->setMethod($this->config->getDefaultPaymentMethod());
         $this->cartRepository->save($quote);
 
         try {
@@ -242,9 +245,9 @@ class CheckoutSessionManagement implements CheckoutSessionManagementInterface
             $orderConfirmation = $this->orderConfirmationFactory->create();
             $orderConfirmation->setId($order->getIncrementId());
 
-            $baseUrl = $this->storeManager->getStore()->getBaseUrl();
+            $baseUrl = rtrim($this->storeManager->getStore()->getBaseUrl(), '/');
             $orderConfirmation->setPermalinkUrl(
-                $baseUrl . 'sales/order/view/order_id/' . $order->getEntityId()
+                $baseUrl . '/sales/order/view/order_id/' . $order->getEntityId()
             );
 
             $session->setStatus(CheckoutSessionInterface::STATUS_COMPLETED);

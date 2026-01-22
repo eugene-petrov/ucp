@@ -26,6 +26,7 @@ use Aeqet\Ucp\Api\Data\TotalInterface;
 use Aeqet\Ucp\Api\Data\TotalInterfaceFactory;
 use Aeqet\Ucp\Api\Data\UcpMetaInterface;
 use Aeqet\Ucp\Api\Data\UcpMetaInterfaceFactory;
+use Aeqet\Ucp\Model\Config\Config;
 use DateTime;
 use DateTimeZone;
 use Exception;
@@ -58,6 +59,7 @@ class QuoteToUcpConverter
      * @param StoreManagerInterface $storeManager
      * @param ImageHelper $imageHelper
      * @param LoggerInterface $logger
+     * @param Config $config
      */
     public function __construct(
         private readonly CheckoutSessionInterfaceFactory $checkoutSessionFactory,
@@ -73,7 +75,8 @@ class QuoteToUcpConverter
         private readonly FulfillmentOptionInterfaceFactory $fulfillmentOptionFactory,
         private readonly StoreManagerInterface $storeManager,
         private readonly ImageHelper $imageHelper,
-        private readonly LoggerInterface $logger
+        private readonly LoggerInterface $logger,
+        private readonly Config $config
     ) {
     }
 
@@ -338,21 +341,22 @@ class QuoteToUcpConverter
     private function createLinks(string $maskedId): array
     {
         $links = [];
-        $baseUrl = $this->storeManager->getStore()->getBaseUrl();
+        $baseUrl = rtrim($this->storeManager->getStore()->getBaseUrl(), '/');
+        $apiEndpoint = $this->config->getApiEndpoint();
 
         $selfLink = $this->linkFactory->create();
         $selfLink->setRel(LinkInterface::REL_SELF);
-        $selfLink->setHref($baseUrl . 'rest/V1/ucp/checkout/ucp_' . $maskedId);
+        $selfLink->setHref($baseUrl . '/' . ltrim($apiEndpoint, '/') . '/checkout/ucp_' . $maskedId);
         $links[] = $selfLink;
 
         $tosLink = $this->linkFactory->create();
         $tosLink->setRel(LinkInterface::REL_TERMS_OF_SERVICE);
-        $tosLink->setHref($baseUrl . 'terms');
+        $tosLink->setHref($baseUrl . '/terms');
         $links[] = $tosLink;
 
         $privacyLink = $this->linkFactory->create();
         $privacyLink->setRel(LinkInterface::REL_PRIVACY_POLICY);
-        $privacyLink->setHref($baseUrl . 'privacy');
+        $privacyLink->setHref($baseUrl . '/privacy');
         $links[] = $privacyLink;
 
         return $links;
