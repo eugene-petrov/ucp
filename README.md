@@ -1,5 +1,9 @@
 # UCP (Universal Commerce Protocol) Module for Magento 2 (MVP)
 
+![Composer](https://github.com/eugene-petrov/ucp/actions/workflows/composer.yml/badge.svg)
+![PHPCS](https://github.com/eugene-petrov/ucp/actions/workflows/phpcs.yml/badge.svg)
+![Magento 2 Standards](https://github.com/eugene-petrov/ucp/actions/workflows/magento-standards.yml/badge.svg)
+
 ## Overview
 
 This module implements the Google UCP (Universal Commerce Protocol) specification version 2026-01-11 for Magento 2. It provides REST API endpoints to create and manage checkout sessions that can be used by external payment and checkout systems.
