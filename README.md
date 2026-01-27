@@ -30,6 +30,48 @@ This module implements the Google UCP (Universal Commerce Protocol) specificatio
 
 ---
 
+## Installation
+
+### Via Composer (recommended)
+
+1. Add the GitHub repository to your `composer.json`:
+
+```bash
+composer config repositories.aeqet-ucp vcs https://github.com/eugene-petrov/magento2-ucp
+```
+
+2. Require the module:
+
+```bash
+composer require aeqet/magento2-module-ucp:dev-main
+```
+
+3. Enable the module:
+
+```bash
+bin/magento module:enable Aeqet_Ucp
+bin/magento setup:upgrade
+bin/magento cache:flush
+```
+
+### Manual Installation
+
+1. Clone the repository to `app/code/Aeqet/Ucp`:
+
+```bash
+mkdir -p app/code/Aeqet
+git clone https://github.com/eugene-petrov/magento2-ucp app/code/Aeqet/Ucp
+```
+
+2. Enable the module:
+
+```bash
+bin/magento module:enable Aeqet_Ucp
+bin/magento setup:upgrade
+```
+
+---
+
 ## Configuration
 
 Navigate to **Stores > Configuration > Aeqet > UCP Settings** to configure:
