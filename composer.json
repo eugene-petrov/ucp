@@ -1,5 +1,5 @@
 {
-    "name": "aeqet/module-ucp",
+    "name": "aeqet/magento2-module-ucp",
     "description": "UCP (Universal Commerce Protocol) integration module for Magento 2",
     "type": "magento2-module",
     "license": [
