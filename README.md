@@ -27,6 +27,7 @@ This module implements the Google UCP (Universal Commerce Protocol) specificatio
 - **Manifest Generation** - Console command to generate UCP manifest at `/.well-known/ucp`
 - **Admin Configuration** - Configure module settings via Magento admin panel
 - **Session Persistence** - Checkout sessions persisted to database with foreign key to quote table
+- **Signing Keys** - ECDSA P-256 key generation for webhook signature verification (UCP compliance)
 
 ---
 
@@ -107,6 +108,33 @@ bin/magento ucp:manifest:generate
 - `--output` - Output file path (default: `pub/.well-known/ucp`)
 - `--pretty` - Pretty print JSON output
 
+### Generate Signing Keys
+
+Generate ECDSA P-256 signing keys for webhook authentication:
+
+```bash
+bin/magento ucp:keys:generate
+```
+
+**Options:**
+- `--kid` or `-k` - Custom key ID (auto-generated if not provided)
+- `--force` or `-f` - Skip confirmation prompt
+- `--expires` or `-e` - Key expiration date (YYYY-MM-DD format)
+
+**Example:**
+```bash
+# Generate a new key with auto-generated ID
+bin/magento ucp:keys:generate --force
+
+# Generate a key with custom ID and expiration
+bin/magento ucp:keys:generate --kid=production_2026 --expires=2027-01-01
+
+# Regenerate manifest to include new keys
+bin/magento ucp:manifest:generate
+```
+
+The public key will be included in the `signing_keys` array of the UCP manifest at `/.well-known/ucp`. Multiple keys can be active simultaneously for key rotation support.
+
 ---
 
 ## TODO - Roadmap to Full UCP Compliance
@@ -115,11 +143,8 @@ This section documents what remains to fully implement the Google Universal Comm
 
 ### Critical (Required for UCP Compliance)
 
-- [ ] **Signing Keys for Webhook Verification**
-  - Generate RSA or ECDSA key pairs for signing webhook payloads
-  - Store public keys in manifest `signing_keys` array
-  - Implement `Aeqet\Ucp\Model\Webhook\Signer` for payload signing
-  - Support key rotation with multiple active keys
+- [ ] **Signing Keys Infrastructure** *(Completed)*
+  - [ ] Implement `Aeqet\Ucp\Model\Webhook\Signer` for payload signing (Detached JWT RFC 7797)
 
 - [ ] **OpenAPI Schema Generation**
   - Auto-generate OpenAPI 3.0 schema for REST endpoints
