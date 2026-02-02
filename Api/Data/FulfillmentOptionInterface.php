@@ -74,13 +74,13 @@ interface FulfillmentOptionInterface
      *
      * @return bool
      */
-    public function getIsSelected(): bool;
+    public function getSelected(): bool;
 
     /**
-     * Set is selected
+     * Set selected
      *
-     * @param bool $isSelected
+     * @param bool $selected
      * @return $this
      */
-    public function setIsSelected(bool $isSelected): self;
+    public function setSelected(bool $selected): self;
 }

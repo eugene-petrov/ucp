@@ -6,7 +6,7 @@
 
 ## Overview
 
-This module implements the Google UCP (Universal Commerce Protocol) specification version 2026-01-11 for Magento 2. It provides REST API endpoints to create and manage checkout sessions that can be used by external payment and checkout systems.
+This module implements the Google UCP (Universal Commerce Protocol) specification version 2026-01-23 for Magento 2. It provides REST API endpoints to create and manage checkout sessions that can be used by external payment and checkout systems.
 
 **Current Status:** MVP Implementation
 
