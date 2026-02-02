@@ -79,16 +79,16 @@ class FulfillmentOption extends DataObject implements FulfillmentOptionInterface
     /**
      * @inheritDoc
      */
-    public function getIsSelected(): bool
+    public function getSelected(): bool
     {
-        return (bool) $this->getData('is_selected');
+        return (bool) $this->getData('selected');
     }
 
     /**
      * @inheritDoc
      */
-    public function setIsSelected(bool $isSelected): FulfillmentOptionInterface
+    public function setSelected(bool $selected): FulfillmentOptionInterface
     {
-        return $this->setData('is_selected', $isSelected);
+        return $this->setData('selected', $selected);
     }
 }

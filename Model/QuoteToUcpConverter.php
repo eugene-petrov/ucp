@@ -37,7 +37,7 @@ use Psr\Log\LoggerInterface;
 
 class QuoteToUcpConverter
 {
-    private const UCP_VERSION = '2026-01-11';
+    private const UCP_VERSION = '2026-01-23';
     private const CAPABILITY_CHECKOUT = 'dev.ucp.shopping.checkout';
     private const CAPABILITY_CATALOG = 'dev.ucp.shopping.catalog';
     private const PAYMENT_HANDLER_DELEGATE = 'dev.ucp.delegate_payment';
@@ -395,7 +395,7 @@ class QuoteToUcpConverter
             $option->setDisplayName($methodTitle . ' - ' . $carrierTitle);
 
             $option->setPrice($this->toCents((float) $rate->getPrice()));
-            $option->setIsSelected($rate->getCode() === $currentShippingMethod);
+            $option->setSelected($rate->getCode() === $currentShippingMethod);
 
             $options[] = $option;
         }

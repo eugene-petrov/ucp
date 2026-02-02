@@ -10,7 +10,7 @@ use Magento\Store\Model\StoreManagerInterface;
 
 class Generator implements ManifestGeneratorInterface
 {
-    private const UCP_VERSION = '2026-01-11';
+    private const UCP_VERSION = '2026-01-23';
     private const UCP_SPEC_BASE = 'https://ucp.dev/specification/capabilities/';
     private const UCP_SCHEMA_BASE = 'https://ucp.dev/schemas/';
 
