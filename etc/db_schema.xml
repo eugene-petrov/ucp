@@ -43,4 +43,34 @@
             <column name="created_at"/>
         </index>
     </table>
+
+    <table name="aeqet_ucp_signing_key" resource="default" engine="innodb"
+           comment="UCP Signing Keys for Webhook Authentication">
+        <column xsi:type="int" name="entity_id" unsigned="true" nullable="false" identity="true"
+                comment="Entity ID"/>
+        <column xsi:type="varchar" name="kid" nullable="false" length="64"
+                comment="Key ID (kid) for JWK identification"/>
+        <column xsi:type="text" name="public_key_jwk" nullable="false"
+                comment="Public Key in JWK JSON format"/>
+        <column xsi:type="text" name="private_key_pem" nullable="false"
+                comment="Private Key in PEM format (encrypted by Magento)"/>
+        <column xsi:type="boolean" name="is_active" nullable="false" default="true"
+                comment="Whether this key is active for signing"/>
+        <column xsi:type="timestamp" name="created_at" on_update="false" nullable="false"
+                default="CURRENT_TIMESTAMP" comment="Created At"/>
+        <column xsi:type="timestamp" name="expires_at" on_update="false" nullable="true"
+                comment="Key Expiration Date"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="entity_id"/>
+        </constraint>
+        <constraint xsi:type="unique" referenceId="AEQET_UCP_SIGNING_KEY_KID">
+            <column name="kid"/>
+        </constraint>
+        <index referenceId="AEQET_UCP_SIGNING_KEY_IS_ACTIVE" indexType="btree">
+            <column name="is_active"/>
+        </index>
+        <index referenceId="AEQET_UCP_SIGNING_KEY_CREATED_AT" indexType="btree">
+            <column name="created_at"/>
+        </index>
+    </table>
 </schema>

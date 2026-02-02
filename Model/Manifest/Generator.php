@@ -6,6 +6,7 @@ namespace Aeqet\Ucp\Model\Manifest;
 
 use Aeqet\Ucp\Api\ManifestGeneratorInterface;
 use Aeqet\Ucp\Model\Config\Config;
+use Aeqet\Ucp\Model\Security\KeyManager;
 use Magento\Store\Model\StoreManagerInterface;
 
 class Generator implements ManifestGeneratorInterface
@@ -15,14 +16,14 @@ class Generator implements ManifestGeneratorInterface
     private const UCP_SCHEMA_BASE = 'https://ucp.dev/schemas/';
 
     /**
-     * Constructor
-     *
      * @param StoreManagerInterface $storeManager
      * @param Config $config
+     * @param KeyManager $keyManager
      */
     public function __construct(
         private readonly StoreManagerInterface $storeManager,
-        private readonly Config $config
+        private readonly Config $config,
+        private readonly KeyManager $keyManager
     ) {
     }
 
@@ -51,7 +52,7 @@ class Generator implements ManifestGeneratorInterface
             'payment' => [
                 'handlers' => $this->buildPaymentHandlers($baseUrl),
             ],
-            'signing_keys' => [],
+            'signing_keys' => $this->keyManager->getActivePublicKeysAsJwk(),
         ];
     }
 

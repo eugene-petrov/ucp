@@ -132,6 +132,16 @@
             <argument name="logger" xsi:type="object">Aeqet\Ucp\Logger\Logger</argument>
         </arguments>
     </type>
+    <type name="Aeqet\Ucp\Model\Security\KeyManager">
+        <arguments>
+            <argument name="logger" xsi:type="object">Aeqet\Ucp\Logger\Logger</argument>
+        </arguments>
+    </type>
+    <type name="Aeqet\Ucp\Console\Command\GenerateSigningKeysCommand">
+        <arguments>
+            <argument name="logger" xsi:type="object">Aeqet\Ucp\Logger\Logger</argument>
+        </arguments>
+    </type>
 
     <!-- Console Commands -->
     <type name="Magento\Framework\Console\CommandListInterface">
@@ -139,6 +149,9 @@
             <argument name="commands" xsi:type="array">
                 <item name="ucp_manifest_generate" xsi:type="object">
                     Aeqet\Ucp\Console\Command\GenerateManifestCommand
+                </item>
+                <item name="ucp_keys_generate" xsi:type="object">
+                    Aeqet\Ucp\Console\Command\GenerateSigningKeysCommand
                 </item>
             </argument>
         </arguments>
