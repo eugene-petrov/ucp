@@ -71,6 +71,10 @@
     <preference for="Aeqet\Ucp\Api\Data\CartItemOptionInterface"
                 type="Aeqet\Ucp\Model\Data\CartItemOption"/>
 
+    <!-- API Schema -->
+    <preference for="Aeqet\Ucp\Api\OpenApiSchemaManagementInterface"
+                type="Aeqet\Ucp\Model\OpenApiSchemaManagement"/>
+
     <!-- Webhook Signing -->
     <preference for="Aeqet\Ucp\Api\Webhook\SignerInterface"
                 type="Aeqet\Ucp\Model\Webhook\Signer"/>

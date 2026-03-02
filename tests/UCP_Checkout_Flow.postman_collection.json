@@ -2,10 +2,61 @@
 	"info": {
 		"_postman_id": "aeqet-ucp-checkout-flow",
 		"name": "Aeqet UCP Checkout Flow",
-		"description": "Complete test flow for Aeqet_Ucp module.\n\n## Flow:\n1. Catalog: Search products, get categories\n2. Cart: Create cart, add items via UCP API\n3. Checkout: Create UCP session and complete order\n\n## Capabilities:\n- dev.ucp.shopping.checkout - Checkout flow\n- dev.ucp.shopping.catalog - Product/category browsing\n\n## Setup:\n1. Set `base_url` variable to your Magento instance\n2. Ensure you have products in catalog",
+		"description": "Complete test flow for Aeqet_Ucp module.\n\n## Flow:\n0. API Discovery: Fetch OpenAPI schema\n1. Catalog: Search products, get categories\n2. Cart: Create cart, add items via UCP API\n3. Checkout: Create UCP session and complete order\n\n## Capabilities:\n- dev.ucp.shopping.checkout - Checkout flow\n- dev.ucp.shopping.catalog - Product/category browsing\n\n## Setup:\n1. Set `base_url` variable to your Magento instance\n2. Ensure you have products in catalog",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
+		{
+			"name": "0. API Discovery",
+			"item": [
+				{
+					"name": "0.1 Get OpenAPI Schema",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response is Swagger 2.0\", function () {",
+									"    pm.expect(jsonData.swagger).to.eql(\"2.0\");",
+									"});",
+									"",
+									"pm.test(\"Contains UCP paths\", function () {",
+									"    var paths = Object.keys(jsonData.paths || {});",
+									"    var ucpPaths = paths.filter(function(p) { return p.indexOf('/V1/ucp') !== -1; });",
+									"    pm.expect(ucpPaths.length).to.be.above(0);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/rest/V1/ucp/openapi.json",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"rest",
+								"V1",
+								"ucp",
+								"openapi.json"
+							]
+						},
+						"description": "Returns Swagger 2.0 schema for all UCP endpoints.\n\nLinked from the UCP manifest's `rest.schema` field — external systems (UCP hub, AI agents) use this to discover available methods, parameters, and response formats."
+					},
+					"response": []
+				}
+			]
+		},
 		{
 			"name": "1. Catalog - Products",
 			"item": [

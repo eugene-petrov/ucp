@@ -147,14 +147,14 @@ interface CatalogProductInterface
     /**
      * Get attributes (key-value pairs)
      *
-     * @return array|null
+     * @return string[]|null
      */
     public function getAttributes(): ?array;
 
     /**
      * Set attributes
      *
-     * @param array|null $attributes
+     * @param string[]|null $attributes
      * @return $this
      */
     public function setAttributes(?array $attributes): self;
