@@ -32,6 +32,11 @@
             "Aeqet\\Ucp\\": ""
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "Aeqet\\Ucp\\Tests\\": "tests/"
+        }
+    },
     "scripts": {
         "phpcs": "phpcs --standard=Magento2 .",
         "phpcs-fix": "phpcbf --standard=Magento2 .",
