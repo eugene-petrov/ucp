@@ -28,6 +28,7 @@ This module implements the Google UCP (Universal Commerce Protocol) specificatio
 - **Admin Configuration** - Configure module settings via Magento admin panel
 - **Session Persistence** - Checkout sessions persisted to database with foreign key to quote table
 - **Signing Keys** - ECDSA P-256 key generation for webhook signature verification (UCP compliance)
+- **Webhook Signer** - Detached JWT (RFC 7797) payload signing with ES256 via `Aeqet\Ucp\Model\Webhook\Signer`
 
 ---
 
@@ -143,8 +144,8 @@ This section documents what remains to fully implement the Google Universal Comm
 
 ### Critical (Required for UCP Compliance)
 
-- [ ] **Signing Keys Infrastructure** *(Completed)*
-  - [ ] Implement `Aeqet\Ucp\Model\Webhook\Signer` for payload signing (Detached JWT RFC 7797)
+- [x] **Signing Keys Infrastructure** *(Completed)*
+  - [x] Implement `Aeqet\Ucp\Model\Webhook\Signer` for payload signing (Detached JWT RFC 7797)
 
 - [ ] **OpenAPI Schema Generation**
   - Auto-generate OpenAPI 3.0 schema for REST endpoints

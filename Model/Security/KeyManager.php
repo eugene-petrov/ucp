@@ -112,6 +112,19 @@ class KeyManager
     }
 
     /**
+     * Decrypt the private key PEM from an already-loaded signing key entity
+     *
+     * Avoids a second DB query when the entity has already been retrieved via getCurrentKey().
+     *
+     * @param SigningKeyEntity $entity
+     * @return string Decrypted PEM string (empty if stored value is blank or decrypt fails)
+     */
+    public function decryptPrivateKey(SigningKeyEntity $entity): string
+    {
+        return $this->encryptor->decrypt($entity->getPrivateKeyPem());
+    }
+
+    /**
      * Get decrypted private key PEM by kid
      *
      * @param string $kid Key ID

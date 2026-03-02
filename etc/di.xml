@@ -71,6 +71,12 @@
     <preference for="Aeqet\Ucp\Api\Data\CartItemOptionInterface"
                 type="Aeqet\Ucp\Model\Data\CartItemOption"/>
 
+    <!-- Webhook Signing -->
+    <preference for="Aeqet\Ucp\Api\Webhook\SignerInterface"
+                type="Aeqet\Ucp\Model\Webhook\Signer"/>
+    <preference for="Aeqet\Ucp\Api\Data\Webhook\SignatureResultInterface"
+                type="Aeqet\Ucp\Model\Data\Webhook\SignatureResult"/>
+
     <!-- Custom Logger for Aeqet_Ucp -->
     <virtualType name="Aeqet\Ucp\Logger\Handler" type="Magento\Framework\Logger\Handler\Base">
         <arguments>
