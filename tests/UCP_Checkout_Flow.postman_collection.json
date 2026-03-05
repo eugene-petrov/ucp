@@ -817,7 +817,6 @@
 									"});",
 									"",
 									"pm.collectionVariables.set(\"agent_cart_id\", jsonData.id);",
-									"// Extract masked ID for checkout",
 									"var maskedId = jsonData.id.replace('cart_', '');",
 									"pm.collectionVariables.set(\"agent_cart_masked_id\", maskedId);"
 								],
@@ -905,7 +904,7 @@
 					"response": []
 				},
 				{
-					"name": "4.4 Set Shipping (Magento API)",
+					"name": "4.4 Create UCP Checkout Session",
 					"event": [
 						{
 							"listen": "test",
@@ -917,119 +916,16 @@
 									"    pm.response.to.have.status(200);",
 									"});",
 									"",
-									"if (jsonData.length > 0) {",
-									"    pm.collectionVariables.set(\"agent_shipping_carrier\", jsonData[0].carrier_code);",
-									"    pm.collectionVariables.set(\"agent_shipping_method\", jsonData[0].method_code);",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"address\": {\n        \"firstname\": \"AI\",\n        \"lastname\": \"Agent\",\n        \"email\": \"ai.agent@example.com\",\n        \"street\": [\"123 AI Street\"],\n        \"city\": \"San Francisco\",\n        \"region_id\": 12,\n        \"region_code\": \"CA\",\n        \"country_id\": \"US\",\n        \"postcode\": \"94105\",\n        \"telephone\": \"+14155551234\"\n    }\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/rest/V1/guest-carts/{{agent_cart_masked_id}}/estimate-shipping-methods",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"rest",
-								"V1",
-								"guest-carts",
-								"{{agent_cart_masked_id}}",
-								"estimate-shipping-methods"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "4.5 Set Shipping Info (Magento API)",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"var jsonData = pm.response.json();",
-									"",
-									"pm.test(\"Status code is 200\", function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"pm.test(\"Payment methods available\", function () {",
-									"    pm.expect(jsonData.payment_methods).to.be.an('array');",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"addressInformation\": {\n        \"shipping_address\": {\n            \"firstname\": \"AI\",\n            \"lastname\": \"Agent\",\n            \"email\": \"ai.agent@example.com\",\n            \"street\": [\"123 AI Street\"],\n            \"city\": \"San Francisco\",\n            \"region_id\": 12,\n            \"region_code\": \"CA\",\n            \"country_id\": \"US\",\n            \"postcode\": \"94105\",\n            \"telephone\": \"+14155551234\"\n        },\n        \"billing_address\": {\n            \"firstname\": \"AI\",\n            \"lastname\": \"Agent\",\n            \"email\": \"ai.agent@example.com\",\n            \"street\": [\"123 AI Street\"],\n            \"city\": \"San Francisco\",\n            \"region_id\": 12,\n            \"region_code\": \"CA\",\n            \"country_id\": \"US\",\n            \"postcode\": \"94105\",\n            \"telephone\": \"+14155551234\"\n        },\n        \"shipping_carrier_code\": \"{{agent_shipping_carrier}}\",\n        \"shipping_method_code\": \"{{agent_shipping_method}}\"\n    }\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/rest/V1/guest-carts/{{agent_cart_masked_id}}/shipping-information",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"rest",
-								"V1",
-								"guest-carts",
-								"{{agent_cart_masked_id}}",
-								"shipping-information"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "4.6 Create UCP Checkout Session",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"var jsonData = pm.response.json();",
-									"",
-									"pm.test(\"Status code is 200\", function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"pm.test(\"UCP Session created\", function () {",
+									"pm.test(\"Session created with id\", function () {",
 									"    pm.expect(jsonData.id).to.match(/^ucp_/);",
 									"});",
 									"",
-									"pm.collectionVariables.set(\"agent_ucp_session_id\", jsonData.id);",
-									"",
-									"pm.test(\"Has both capabilities\", function () {",
-									"    var capNames = jsonData.ucp.capabilities.map(c => c.name);",
-									"    pm.expect(capNames).to.include('dev.ucp.shopping.checkout');",
-									"    pm.expect(capNames).to.include('dev.ucp.shopping.catalog');",
+									"pm.test(\"Status is incomplete\", function () {",
+									"    pm.expect(jsonData.status).to.eql('incomplete');",
 									"});",
 									"",
-									"console.log(\"UCP Session: \" + jsonData.id);",
-									"console.log(\"Status: \" + jsonData.status);"
+									"pm.collectionVariables.set(\"agent_ucp_session_id\", jsonData.id);",
+									"console.log(\"UCP Session: \" + jsonData.id + \" | status: \" + jsonData.status);"
 								],
 								"type": "text/javascript"
 							}
@@ -1057,6 +953,128 @@
 								"V1",
 								"ucp",
 								"checkout"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "4.5 Update Session: Buyer + Address",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Status is still incomplete (no method selected yet)\", function () {",
+									"    pm.expect(jsonData.status).to.eql('incomplete');",
+									"});",
+									"",
+									"pm.test(\"fulfillmentOptions populated\", function () {",
+									"    pm.expect(jsonData.fulfillment_options).to.be.an('array');",
+									"    pm.expect(jsonData.fulfillment_options.length).to.be.greaterThan(0);",
+									"});",
+									"",
+									"pm.test(\"fulfillmentAddress set in response\", function () {",
+									"    pm.expect(jsonData.fulfillment_address).to.be.an('object');",
+									"    pm.expect(jsonData.fulfillment_address.street_line1).to.be.a('string');",
+									"});",
+									"",
+									"// Save first available shipping method for next step",
+									"if (jsonData.fulfillment_options && jsonData.fulfillment_options.length > 0) {",
+									"    pm.collectionVariables.set(\"agent_fulfillment_id\", jsonData.fulfillment_options[0].id);",
+									"    console.log(\"Available methods:\", jsonData.fulfillment_options.map(o => o.id + ' (' + o.display_name + ')'));",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"buyer\": {\n        \"firstName\": \"AI\",\n        \"lastName\": \"Agent\",\n        \"email\": \"ai.agent@example.com\",\n        \"phoneNumber\": \"+14155551234\"\n    },\n    \"fulfillmentAddress\": {\n        \"firstName\": \"AI\",\n        \"lastName\": \"Agent\",\n        \"streetLine1\": \"123 AI Street\",\n        \"city\": \"San Francisco\",\n        \"state\": \"CA\",\n        \"postalCode\": \"94105\",\n        \"countryCode\": \"US\",\n        \"phone\": \"+14155551234\"\n    }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/rest/V1/ucp/checkout/{{agent_ucp_session_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"rest",
+								"V1",
+								"ucp",
+								"checkout",
+								"{{agent_ucp_session_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "4.6 Update Session: Select Shipping Method",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Status is ready_for_complete\", function () {",
+									"    pm.expect(jsonData.status).to.eql('ready_for_complete');",
+									"});",
+									"",
+									"pm.test(\"Selected method is marked\", function () {",
+									"    var selected = jsonData.fulfillment_options.find(o => o.selected === true);",
+									"    pm.expect(selected).to.be.an('object');",
+									"    pm.expect(selected.id).to.eql(pm.collectionVariables.get('agent_fulfillment_id'));",
+									"});",
+									"",
+									"console.log(\"Status: \" + jsonData.status);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"selectedFulfillmentId\": \"{{agent_fulfillment_id}}\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/rest/V1/ucp/checkout/{{agent_ucp_session_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"rest",
+								"V1",
+								"ucp",
+								"checkout",
+								"{{agent_ucp_session_id}}"
 							]
 						}
 					},
@@ -1713,6 +1731,11 @@
 		},
 		{
 			"key": "agent_order_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "agent_fulfillment_id",
 			"value": "",
 			"type": "string"
 		}

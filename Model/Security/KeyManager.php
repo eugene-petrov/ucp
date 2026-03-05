@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Aeqet\Ucp\Model\Security;
 
-use Aeqet\Ucp\Model\SigningKeyEntity;
-use Aeqet\Ucp\Model\SigningKeyEntityFactory;
 use Aeqet\Ucp\Model\ResourceModel\SigningKey as SigningKeyResource;
 use Aeqet\Ucp\Model\ResourceModel\SigningKey\CollectionFactory as SigningKeyCollectionFactory;
 use Magento\Framework\Encryption\EncryptorInterface;
@@ -117,11 +115,19 @@ class KeyManager
      * Avoids a second DB query when the entity has already been retrieved via getCurrentKey().
      *
      * @param SigningKeyEntity $entity
-     * @return string Decrypted PEM string (empty if stored value is blank or decrypt fails)
+     * @return string Decrypted PEM string
+     * @throws LocalizedException If decryption fails or produces an empty result
      */
     public function decryptPrivateKey(SigningKeyEntity $entity): string
     {
-        return $this->encryptor->decrypt($entity->getPrivateKeyPem());
+        $decrypted = $this->encryptor->decrypt($entity->getPrivateKeyPem());
+        if ($decrypted === '') {
+            throw new LocalizedException(
+                __('Failed to decrypt signing key "%1": the decrypted value is empty. '
+                    . 'The Magento encryption key may have been rotated.', $entity->getKid())
+            );
+        }
+        return $decrypted;
     }
 
     /**

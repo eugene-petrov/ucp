@@ -6,7 +6,7 @@ namespace Aeqet\Ucp\Console\Command;
 
 use Aeqet\Ucp\Model\Security\JwkGenerator;
 use Aeqet\Ucp\Model\Security\KeyManager;
-use Aeqet\Ucp\Model\SigningKeyEntity;
+use Aeqet\Ucp\Model\Security\SigningKeyEntity;
 use DateTime;
 use Exception;
 use Psr\Log\LoggerInterface;

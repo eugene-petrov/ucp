@@ -7,13 +7,12 @@ namespace Aeqet\Ucp\Model\Manifest;
 use Aeqet\Ucp\Api\ManifestGeneratorInterface;
 use Aeqet\Ucp\Model\Config\Config;
 use Aeqet\Ucp\Model\Security\KeyManager;
+use Aeqet\Ucp\Model\Utils\UcpConstants;
 use Magento\Store\Model\StoreManagerInterface;
 
 class Generator implements ManifestGeneratorInterface
 {
-    private const UCP_VERSION = '2026-01-23';
-    private const UCP_SPEC_BASE = 'https://ucp.dev/specification/capabilities/';
-    private const UCP_SCHEMA_BASE = 'https://ucp.dev/schemas/';
+    private const UCP_SPEC_BASE = 'https://ucp.dev/specification/';
 
     /**
      * @param StoreManagerInterface $storeManager
@@ -37,10 +36,10 @@ class Generator implements ManifestGeneratorInterface
 
         return [
             'ucp' => [
-                'version' => self::UCP_VERSION,
+                'version' => UcpConstants::UCP_VERSION,
                 'services' => [
                     'dev.ucp.shopping' => [
-                        'version' => self::UCP_VERSION,
+                        'version' => UcpConstants::UCP_VERSION,
                         'rest' => [
                             'endpoint' => $apiEndpoint,
                             'schema' => $apiEndpoint . '/openapi.json',
@@ -85,39 +84,44 @@ class Generator implements ManifestGeneratorInterface
     }
 
     /**
-     * Build capabilities array for manifest
+     * Build capabilities map for manifest
      *
-     * @return array
+     * Returns an associative array keyed by capability name, as required by the UCP spec.
+     * Each value is an array containing one capability entry object.
+     *
+     * @return array<string, array>
      */
     private function buildCapabilities(): array
     {
         $capabilities = [];
 
         if ($this->config->isCheckoutCapabilityEnabled()) {
-            $capabilities[] = $this->createCapability('checkout');
-            $capabilities[] = $this->createCapability('cart');
+            $capabilities['dev.ucp.shopping.checkout'] = [$this->createCapability('checkout')];
+            $capabilities['dev.ucp.shopping.cart'] = [$this->createCapability('cart')];
         }
 
         if ($this->config->isCatalogCapabilityEnabled()) {
-            $capabilities[] = $this->createCapability('catalog');
+            $capabilities['dev.ucp.shopping.catalog'] = [$this->createCapability('catalog')];
         }
 
         return $capabilities;
     }
 
     /**
-     * Create a capability entry
+     * Create a capability entry object
      *
-     * @param string $name
+     * The capability name is the map key in the manifest, not a field inside the entry.
+     * Schema URL includes the spec version per https://ucp.dev/latest/specification/overview/
+     *
+     * @param string $name Capability short name (e.g. 'checkout', 'cart', 'catalog')
      * @return array
      */
     private function createCapability(string $name): array
     {
         return [
-            'name' => 'dev.ucp.shopping.' . $name,
-            'version' => self::UCP_VERSION,
+            'version' => UcpConstants::UCP_VERSION,
             'spec' => self::UCP_SPEC_BASE . $name,
-            'schema' => self::UCP_SCHEMA_BASE . $name . '.json',
+            'schema' => 'https://ucp.dev/' . UcpConstants::UCP_VERSION . '/schemas/shopping/' . $name . '.json',
         ];
     }
 

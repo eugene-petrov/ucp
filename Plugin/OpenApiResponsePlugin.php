@@ -42,7 +42,7 @@ class OpenApiResponsePlugin
         callable $proceed,
         mixed $outputData = null,
     ): void {
-        if (!is_string($outputData) || !str_ends_with($this->request->getPathInfo(), self::OPENAPI_PATH)) {
+        if (!is_string($outputData) || $this->request->getPathInfo() !== self::OPENAPI_PATH) {
             $proceed($outputData);
             return;
         }

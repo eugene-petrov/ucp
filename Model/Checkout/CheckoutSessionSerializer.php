@@ -8,7 +8,7 @@
 
 declare(strict_types=1);
 
-namespace Aeqet\Ucp\Model;
+namespace Aeqet\Ucp\Model\Checkout;
 
 use Aeqet\Ucp\Api\Data\BuyerInterface;
 use Aeqet\Ucp\Api\Data\BuyerInterfaceFactory;

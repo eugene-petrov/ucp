@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Aeqet\Ucp\Model\ResourceModel\SigningKey;
 
-use Aeqet\Ucp\Model\SigningKeyEntity;
 use Aeqet\Ucp\Model\ResourceModel\SigningKey as SigningKeyResource;
+use Aeqet\Ucp\Model\Security\SigningKeyEntity;
 use Magento\Framework\Model\ResourceModel\Db\Collection\AbstractCollection;
 use Zend_Db_Expr;
 

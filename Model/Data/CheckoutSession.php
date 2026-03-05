@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Aeqet\Ucp\Model\Data;
 
+use Aeqet\Ucp\Api\Data\AddressInterface;
 use Aeqet\Ucp\Api\Data\BuyerInterface;
 use Aeqet\Ucp\Api\Data\CheckoutSessionInterface;
 use Aeqet\Ucp\Api\Data\OrderConfirmationInterface;
@@ -222,5 +223,37 @@ class CheckoutSession extends DataObject implements CheckoutSessionInterface
     public function setFulfillmentOptions(array $fulfillmentOptions): CheckoutSessionInterface
     {
         return $this->setData('fulfillment_options', $fulfillmentOptions);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getFulfillmentAddress(): ?AddressInterface
+    {
+        return $this->getData('fulfillment_address');
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function setFulfillmentAddress(?AddressInterface $address): CheckoutSessionInterface
+    {
+        return $this->setData('fulfillment_address', $address);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getSelectedFulfillmentId(): ?string
+    {
+        return $this->getData('selected_fulfillment_id');
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function setSelectedFulfillmentId(?string $id): CheckoutSessionInterface
+    {
+        return $this->setData('selected_fulfillment_id', $id);
     }
 }

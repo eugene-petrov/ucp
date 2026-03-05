@@ -7,7 +7,7 @@ declare(strict_types=1);
 
 namespace Aeqet\Ucp\Model\ResourceModel\CheckoutSession;
 
-use Aeqet\Ucp\Model\CheckoutSessionEntity;
+use Aeqet\Ucp\Model\Checkout\CheckoutSessionEntity;
 use Aeqet\Ucp\Model\ResourceModel\CheckoutSession as CheckoutSessionResource;
 use Magento\Framework\Model\ResourceModel\Db\Collection\AbstractCollection;
 

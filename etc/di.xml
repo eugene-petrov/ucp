@@ -10,14 +10,14 @@
     <!-- Service Interface Preferences -->
     <preference for="Aeqet\Ucp\Api\ManifestGeneratorInterface"
                 type="Aeqet\Ucp\Model\Manifest\Generator"/>
-    <preference for="Aeqet\Ucp\Api\CheckoutSessionManagementInterface"
-                type="Aeqet\Ucp\Model\CheckoutSessionManagement"/>
-    <preference for="Aeqet\Ucp\Api\CatalogProductManagementInterface"
-                type="Aeqet\Ucp\Model\CatalogProductManagement"/>
-    <preference for="Aeqet\Ucp\Api\CatalogCategoryManagementInterface"
-                type="Aeqet\Ucp\Model\CatalogCategoryManagement"/>
-    <preference for="Aeqet\Ucp\Api\CartManagementInterface"
-                type="Aeqet\Ucp\Model\CartManagement"/>
+    <preference for="Aeqet\Ucp\Api\CheckoutSessionServiceInterface"
+                type="Aeqet\Ucp\Model\Checkout\CheckoutSessionService"/>
+    <preference for="Aeqet\Ucp\Api\CatalogProductServiceInterface"
+                type="Aeqet\Ucp\Model\CatalogProductService"/>
+    <preference for="Aeqet\Ucp\Api\CatalogCategoryServiceInterface"
+                type="Aeqet\Ucp\Model\CatalogCategoryService"/>
+    <preference for="Aeqet\Ucp\Api\CartServiceInterface"
+                type="Aeqet\Ucp\Model\CartService"/>
 
     <!-- Data Interface Preferences -->
     <preference for="Aeqet\Ucp\Api\Data\CheckoutSessionInterface"
@@ -28,6 +28,8 @@
                 type="Aeqet\Ucp\Model\Data\ItemData"/>
     <preference for="Aeqet\Ucp\Api\Data\TotalInterface"
                 type="Aeqet\Ucp\Model\Data\Total"/>
+    <preference for="Aeqet\Ucp\Api\Data\AddressInterface"
+                type="Aeqet\Ucp\Model\Data\Address"/>
     <preference for="Aeqet\Ucp\Api\Data\BuyerInterface"
                 type="Aeqet\Ucp\Model\Data\Buyer"/>
     <preference for="Aeqet\Ucp\Api\Data\PaymentInterface"
@@ -72,8 +74,8 @@
                 type="Aeqet\Ucp\Model\Data\CartItemOption"/>
 
     <!-- API Schema -->
-    <preference for="Aeqet\Ucp\Api\OpenApiSchemaManagementInterface"
-                type="Aeqet\Ucp\Model\OpenApiSchemaManagement"/>
+    <preference for="Aeqet\Ucp\Api\OpenApiSchemaServiceInterface"
+                type="Aeqet\Ucp\Model\OpenApiSchemaService"/>
 
     <!-- Webhook Signing -->
     <preference for="Aeqet\Ucp\Api\Webhook\SignerInterface"
@@ -97,6 +99,11 @@
     </virtualType>
 
     <!-- Inject Logger into Models -->
+    <type name="Aeqet\Ucp\Model\QuoteResolver">
+        <arguments>
+            <argument name="logger" xsi:type="object">Aeqet\Ucp\Logger\Logger</argument>
+        </arguments>
+    </type>
     <type name="Aeqet\Ucp\Model\QuoteToUcpConverter">
         <arguments>
             <argument name="logger" xsi:type="object">Aeqet\Ucp\Logger\Logger</argument>
@@ -107,22 +114,27 @@
             <argument name="logger" xsi:type="object">Aeqet\Ucp\Logger\Logger</argument>
         </arguments>
     </type>
-    <type name="Aeqet\Ucp\Model\CatalogCategoryManagement">
+    <type name="Aeqet\Ucp\Model\CatalogCategoryService">
         <arguments>
             <argument name="logger" xsi:type="object">Aeqet\Ucp\Logger\Logger</argument>
         </arguments>
     </type>
-    <type name="Aeqet\Ucp\Model\CheckoutSessionManagement">
+    <type name="Aeqet\Ucp\Model\Checkout\CheckoutSessionSynchronizer">
         <arguments>
             <argument name="logger" xsi:type="object">Aeqet\Ucp\Logger\Logger</argument>
         </arguments>
     </type>
-    <type name="Aeqet\Ucp\Model\CartManagement">
+    <type name="Aeqet\Ucp\Model\Checkout\CheckoutSessionCompleter">
         <arguments>
             <argument name="logger" xsi:type="object">Aeqet\Ucp\Logger\Logger</argument>
         </arguments>
     </type>
-    <type name="Aeqet\Ucp\Model\CatalogProductManagement">
+    <type name="Aeqet\Ucp\Model\CartService">
+        <arguments>
+            <argument name="logger" xsi:type="object">Aeqet\Ucp\Logger\Logger</argument>
+        </arguments>
+    </type>
+    <type name="Aeqet\Ucp\Model\CatalogProductService">
         <arguments>
             <argument name="logger" xsi:type="object">Aeqet\Ucp\Logger\Logger</argument>
         </arguments>

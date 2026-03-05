@@ -8,7 +8,7 @@
 
 declare(strict_types=1);
 
-namespace Aeqet\Ucp\Model;
+namespace Aeqet\Ucp\Model\Checkout;
 
 use Aeqet\Ucp\Model\ResourceModel\CheckoutSession as CheckoutSessionResource;
 use Magento\Framework\Model\AbstractModel;
@@ -159,25 +159,5 @@ class CheckoutSessionEntity extends AbstractModel
     public function setUcpData(string $ucpData): self
     {
         return $this->setData('ucp_data', $ucpData);
-    }
-
-    /**
-     * Get created at timestamp
-     *
-     * @return string|null
-     */
-    public function getCreatedAt(): ?string
-    {
-        return $this->getData('created_at');
-    }
-
-    /**
-     * Get updated at timestamp
-     *
-     * @return string|null
-     */
-    public function getUpdatedAt(): ?string
-    {
-        return $this->getData('updated_at');
     }
 }

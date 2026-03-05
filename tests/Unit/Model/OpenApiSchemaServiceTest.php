@@ -4,25 +4,25 @@ declare(strict_types=1);
 
 namespace Aeqet\Ucp\Tests\Unit\Model;
 
-use Aeqet\Ucp\Model\OpenApiSchemaManagement;
+use Aeqet\Ucp\Model\OpenApiSchemaService;
 use Magento\Framework\Webapi\Rest\Request;
 use Magento\Webapi\Controller\Rest as RestController;
 use Magento\Webapi\Model\Rest\Swagger\Generator as SwaggerGenerator;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
-class OpenApiSchemaManagementTest extends TestCase
+class OpenApiSchemaServiceTest extends TestCase
 {
     private SwaggerGenerator&MockObject $swaggerGenerator;
     private Request&MockObject $request;
-    private OpenApiSchemaManagement $management;
+    private OpenApiSchemaService $management;
 
     protected function setUp(): void
     {
         $this->swaggerGenerator = $this->createMock(SwaggerGenerator::class);
         $this->request = $this->createMock(Request::class);
 
-        $this->management = new OpenApiSchemaManagement(
+        $this->management = new OpenApiSchemaService(
             $this->swaggerGenerator,
             $this->request,
         );
@@ -31,8 +31,8 @@ class OpenApiSchemaManagementTest extends TestCase
     public function testGetOpenApiSchemaFiltersOnlyUcpServices(): void
     {
         $allServices = [
-            'aeqetUcpCheckoutSessionManagementV1',
-            'aeqetUcpCartManagementV1',
+            'aeqetUcpCheckoutSessionServiceV1',
+            'aeqetUcpCartServiceV1',
             'magentoCustomerAccountManagementV1',
             'magentoCatalogProductRepositoryV1',
         ];
@@ -44,8 +44,8 @@ class OpenApiSchemaManagementTest extends TestCase
             ->method('generate')
             ->with(
                 [
-                    'aeqetUcpCheckoutSessionManagementV1',
-                    'aeqetUcpCartManagementV1',
+                    'aeqetUcpCheckoutSessionServiceV1',
+                    'aeqetUcpCartServiceV1',
                 ],
                 $this->anything(),
                 $this->anything(),
@@ -59,8 +59,8 @@ class OpenApiSchemaManagementTest extends TestCase
     public function testGetOpenApiSchemaExcludesSchemaEndpointItself(): void
     {
         $allServices = [
-            'aeqetUcpCheckoutSessionManagementV1',
-            'aeqetUcpOpenApiSchemaManagementV1',
+            'aeqetUcpCheckoutSessionServiceV1',
+            'aeqetUcpOpenApiSchemaServiceV1',
         ];
 
         $this->swaggerGenerator->method('getListOfServices')->willReturn($allServices);
@@ -69,7 +69,7 @@ class OpenApiSchemaManagementTest extends TestCase
         $this->swaggerGenerator->expects($this->once())
             ->method('generate')
             ->with(
-                ['aeqetUcpCheckoutSessionManagementV1'],
+                ['aeqetUcpCheckoutSessionServiceV1'],
                 $this->anything(),
                 $this->anything(),
                 $this->anything()
@@ -84,7 +84,7 @@ class OpenApiSchemaManagementTest extends TestCase
         $schemaJson = '{"swagger":"2.0","info":{"title":"UCP API"},"paths":{}}';
 
         $this->swaggerGenerator->method('getListOfServices')
-            ->willReturn(['aeqetUcpCheckoutSessionManagementV1']);
+            ->willReturn(['aeqetUcpCheckoutSessionServiceV1']);
         $this->swaggerGenerator->method('generate')->willReturn($schemaJson);
         $this->stubRequest();
 
@@ -96,7 +96,7 @@ class OpenApiSchemaManagementTest extends TestCase
     public function testGetOpenApiSchemaBuildsCorrectSchemaEndpointUrl(): void
     {
         $this->swaggerGenerator->method('getListOfServices')
-            ->willReturn(['aeqetUcpCheckoutSessionManagementV1']);
+            ->willReturn(['aeqetUcpCheckoutSessionServiceV1']);
         $this->request->method('getScheme')->willReturn('https');
         $this->request->method('getHttpHost')->willReturn('example.com');
         $this->request->method('getBaseUrl')->willReturn('');
@@ -119,7 +119,7 @@ class OpenApiSchemaManagementTest extends TestCase
     public function testGetOpenApiSchemaBuildsCorrectSchemaEndpointUrlForSubdirectoryInstall(): void
     {
         $this->swaggerGenerator->method('getListOfServices')
-            ->willReturn(['aeqetUcpCheckoutSessionManagementV1']);
+            ->willReturn(['aeqetUcpCheckoutSessionServiceV1']);
         $this->request->method('getScheme')->willReturn('https');
         $this->request->method('getHttpHost')->willReturn('example.com');
         $this->request->method('getBaseUrl')->willReturn('/magento/');
@@ -140,7 +140,7 @@ class OpenApiSchemaManagementTest extends TestCase
     public function testGetOpenApiSchemaPassesHostWithPort(): void
     {
         $this->swaggerGenerator->method('getListOfServices')
-            ->willReturn(['aeqetUcpCheckoutSessionManagementV1']);
+            ->willReturn(['aeqetUcpCheckoutSessionServiceV1']);
         $this->request->method('getScheme')->willReturn('https');
         $this->request->method('getBaseUrl')->willReturn('');
         $this->request->expects($this->once())
@@ -164,7 +164,7 @@ class OpenApiSchemaManagementTest extends TestCase
     public function testGetOpenApiSchemaFallsBackToEmptyHostWhenHttpHostMissing(): void
     {
         $this->swaggerGenerator->method('getListOfServices')
-            ->willReturn(['aeqetUcpCheckoutSessionManagementV1']);
+            ->willReturn(['aeqetUcpCheckoutSessionServiceV1']);
         $this->request->method('getScheme')->willReturn('https');
         $this->request->method('getBaseUrl')->willReturn('');
         $this->request->method('getHttpHost')->willReturn(false);

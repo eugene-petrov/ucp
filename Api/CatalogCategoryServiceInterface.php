@@ -1,6 +1,6 @@
 <?php
 /**
- * UCP Catalog Category Management Interface
+ * UCP Catalog Category Service Interface
  */
 
 declare(strict_types=1);
@@ -10,7 +10,7 @@ namespace Aeqet\Ucp\Api;
 use Aeqet\Ucp\Api\Data\CatalogCategoryInterface;
 use Aeqet\Ucp\Api\Data\CatalogProductSearchResultsInterface;
 
-interface CatalogCategoryManagementInterface
+interface CatalogCategoryServiceInterface
 {
     /**
      * Get category tree

@@ -20,6 +20,8 @@ class Config extends AbstractHelper
     private const XML_PATH_PAYMENT_HANDLER_TYPE = 'aeqet_ucp/payment/handler_type';
     private const XML_PATH_PAYMENT_HANDLER_NAME = 'aeqet_ucp/payment/handler_name';
     private const XML_PATH_DEFAULT_PAYMENT_METHOD = 'aeqet_ucp/payment/default_payment_method';
+    private const XML_PATH_TOS_URL_SUFFIX = 'aeqet_ucp/links/tos_url_suffix';
+    private const XML_PATH_PRIVACY_URL_SUFFIX = 'aeqet_ucp/links/privacy_url_suffix';
 
     /**
      * Check if module is enabled
@@ -140,5 +142,35 @@ class Config extends AbstractHelper
             ScopeInterface::SCOPE_STORE,
             $storeId
         ) ?: 'checkmo';
+    }
+
+    /**
+     * Get Terms of Service URL suffix (appended to store base URL)
+     *
+     * @param int|null $storeId
+     * @return string
+     */
+    public function getTosUrlSuffix(?int $storeId = null): string
+    {
+        return (string) $this->scopeConfig->getValue(
+            self::XML_PATH_TOS_URL_SUFFIX,
+            ScopeInterface::SCOPE_STORE,
+            $storeId
+        ) ?: '/terms';
+    }
+
+    /**
+     * Get Privacy Policy URL suffix (appended to store base URL)
+     *
+     * @param int|null $storeId
+     * @return string
+     */
+    public function getPrivacyUrlSuffix(?int $storeId = null): string
+    {
+        return (string) $this->scopeConfig->getValue(
+            self::XML_PATH_PRIVACY_URL_SUFFIX,
+            ScopeInterface::SCOPE_STORE,
+            $storeId
+        ) ?: '/privacy';
     }
 }

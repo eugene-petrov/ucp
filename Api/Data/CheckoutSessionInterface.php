@@ -208,4 +208,34 @@ interface CheckoutSessionInterface
      * @return $this
      */
     public function setFulfillmentOptions(array $fulfillmentOptions): self;
+
+    /**
+     * Get fulfillment (shipping) address
+     *
+     * @return \Aeqet\Ucp\Api\Data\AddressInterface|null
+     */
+    public function getFulfillmentAddress(): ?AddressInterface;
+
+    /**
+     * Set fulfillment (shipping) address
+     *
+     * @param \Aeqet\Ucp\Api\Data\AddressInterface|null $address
+     * @return $this
+     */
+    public function setFulfillmentAddress(?AddressInterface $address): self;
+
+    /**
+     * Get selected fulfillment option ID (shipping method code)
+     *
+     * @return string|null
+     */
+    public function getSelectedFulfillmentId(): ?string;
+
+    /**
+     * Set selected fulfillment option ID
+     *
+     * @param string|null $id
+     * @return $this
+     */
+    public function setSelectedFulfillmentId(?string $id): self;
 }

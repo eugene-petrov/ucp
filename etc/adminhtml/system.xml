@@ -69,6 +69,25 @@
                 </field>
             </group>
 
+            <!-- Link Settings -->
+            <group id="links" translate="label" type="text" sortOrder="35"
+                   showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Link Settings</label>
+                <comment>URL suffixes appended to the store base URL for legal links in checkout sessions.</comment>
+
+                <field id="tos_url_suffix" translate="label comment" type="text" sortOrder="10"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Terms of Service URL Suffix</label>
+                    <comment>URL suffix for the Terms of Service page (e.g. /terms, /terms-of-service). Default: /terms</comment>
+                </field>
+
+                <field id="privacy_url_suffix" translate="label comment" type="text" sortOrder="20"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Privacy Policy URL Suffix</label>
+                    <comment>URL suffix for the Privacy Policy page (e.g. /privacy, /legal/privacy). Default: /privacy</comment>
+                </field>
+            </group>
+
             <!-- Payment Settings -->
             <group id="payment" translate="label" type="text" sortOrder="40"
                    showInDefault="1" showInWebsite="1" showInStore="1">

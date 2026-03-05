@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Aeqet\Ucp\Api;
 
-interface OpenApiSchemaManagementInterface
+interface OpenApiSchemaServiceInterface
 {
     /**
      * Get the API schema (Swagger 2.0 / OpenAPI 2.0) for all UCP endpoints.
