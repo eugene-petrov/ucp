@@ -1,17 +1,18 @@
 <?php
 /**
- * UCP Catalog Category Management Implementation
+ * UCP Catalog Category Service Implementation
  */
 
 declare(strict_types=1);
 
 namespace Aeqet\Ucp\Model;
 
-use Aeqet\Ucp\Api\CatalogCategoryManagementInterface;
+use Aeqet\Ucp\Api\CatalogCategoryServiceInterface;
 use Aeqet\Ucp\Api\Data\CatalogCategoryInterface;
 use Aeqet\Ucp\Api\Data\CatalogCategoryInterfaceFactory;
 use Aeqet\Ucp\Api\Data\CatalogProductSearchResultsInterface;
 use Aeqet\Ucp\Api\Data\CatalogProductSearchResultsInterfaceFactory;
+use Aeqet\Ucp\Model\Utils\ProductToUcpConverter;
 use Exception;
 use Magento\Catalog\Api\CategoryRepositoryInterface;
 use Magento\Catalog\Api\Data\CategoryInterface;
@@ -24,7 +25,7 @@ use Magento\Framework\UrlInterface;
 use Magento\Store\Model\StoreManagerInterface;
 use Psr\Log\LoggerInterface;
 
-class CatalogCategoryManagement implements CatalogCategoryManagementInterface
+class CatalogCategoryService implements CatalogCategoryServiceInterface
 {
     private const DEFAULT_ROOT_CATEGORY_ID = 2;
 

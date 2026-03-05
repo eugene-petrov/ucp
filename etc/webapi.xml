@@ -37,7 +37,7 @@
 
     <!-- Create Checkout Session -->
     <route url="/V1/ucp/checkout" method="POST">
-        <service class="Aeqet\Ucp\Api\CheckoutSessionManagementInterface" method="create"/>
+        <service class="Aeqet\Ucp\Api\CheckoutSessionServiceInterface" method="create"/>
         <resources>
             <resource ref="anonymous"/>
         </resources>
@@ -45,7 +45,7 @@
 
     <!-- Get Checkout Session -->
     <route url="/V1/ucp/checkout/:sessionId" method="GET">
-        <service class="Aeqet\Ucp\Api\CheckoutSessionManagementInterface" method="get"/>
+        <service class="Aeqet\Ucp\Api\CheckoutSessionServiceInterface" method="get"/>
         <resources>
             <resource ref="anonymous"/>
         </resources>
@@ -53,7 +53,7 @@
 
     <!-- Update Checkout Session -->
     <route url="/V1/ucp/checkout/:sessionId" method="PUT">
-        <service class="Aeqet\Ucp\Api\CheckoutSessionManagementInterface" method="update"/>
+        <service class="Aeqet\Ucp\Api\CheckoutSessionServiceInterface" method="update"/>
         <resources>
             <resource ref="anonymous"/>
         </resources>
@@ -61,7 +61,7 @@
 
     <!-- Complete Checkout Session -->
     <route url="/V1/ucp/checkout/:sessionId/complete" method="POST">
-        <service class="Aeqet\Ucp\Api\CheckoutSessionManagementInterface" method="complete"/>
+        <service class="Aeqet\Ucp\Api\CheckoutSessionServiceInterface" method="complete"/>
         <resources>
             <resource ref="anonymous"/>
         </resources>
@@ -69,7 +69,7 @@
 
     <!-- Cancel Checkout Session -->
     <route url="/V1/ucp/checkout/:sessionId" method="DELETE">
-        <service class="Aeqet\Ucp\Api\CheckoutSessionManagementInterface" method="cancel"/>
+        <service class="Aeqet\Ucp\Api\CheckoutSessionServiceInterface" method="cancel"/>
         <resources>
             <resource ref="anonymous"/>
         </resources>
@@ -81,7 +81,7 @@
 
     <!-- Search Products -->
     <route url="/V1/ucp/products" method="GET">
-        <service class="Aeqet\Ucp\Api\CatalogProductManagementInterface" method="search"/>
+        <service class="Aeqet\Ucp\Api\CatalogProductServiceInterface" method="search"/>
         <resources>
             <resource ref="anonymous"/>
         </resources>
@@ -89,7 +89,7 @@
 
     <!-- Get Product by ID -->
     <route url="/V1/ucp/products/:productId" method="GET">
-        <service class="Aeqet\Ucp\Api\CatalogProductManagementInterface" method="get"/>
+        <service class="Aeqet\Ucp\Api\CatalogProductServiceInterface" method="get"/>
         <resources>
             <resource ref="anonymous"/>
         </resources>
@@ -97,7 +97,7 @@
 
     <!-- Get Product by SKU -->
     <route url="/V1/ucp/products/sku/:sku" method="GET">
-        <service class="Aeqet\Ucp\Api\CatalogProductManagementInterface" method="getBySku"/>
+        <service class="Aeqet\Ucp\Api\CatalogProductServiceInterface" method="getBySku"/>
         <resources>
             <resource ref="anonymous"/>
         </resources>
@@ -109,7 +109,7 @@
 
     <!-- Get Category Tree -->
     <route url="/V1/ucp/categories" method="GET">
-        <service class="Aeqet\Ucp\Api\CatalogCategoryManagementInterface" method="getTree"/>
+        <service class="Aeqet\Ucp\Api\CatalogCategoryServiceInterface" method="getTree"/>
         <resources>
             <resource ref="anonymous"/>
         </resources>
@@ -117,7 +117,7 @@
 
     <!-- Get Category by ID -->
     <route url="/V1/ucp/categories/:categoryId" method="GET">
-        <service class="Aeqet\Ucp\Api\CatalogCategoryManagementInterface" method="get"/>
+        <service class="Aeqet\Ucp\Api\CatalogCategoryServiceInterface" method="get"/>
         <resources>
             <resource ref="anonymous"/>
         </resources>
@@ -125,7 +125,7 @@
 
     <!-- Get Products in Category -->
     <route url="/V1/ucp/categories/:categoryId/products" method="GET">
-        <service class="Aeqet\Ucp\Api\CatalogCategoryManagementInterface" method="getProducts"/>
+        <service class="Aeqet\Ucp\Api\CatalogCategoryServiceInterface" method="getProducts"/>
         <resources>
             <resource ref="anonymous"/>
         </resources>
@@ -137,7 +137,7 @@
 
     <!-- Create Cart -->
     <route url="/V1/ucp/cart" method="POST">
-        <service class="Aeqet\Ucp\Api\CartManagementInterface" method="create"/>
+        <service class="Aeqet\Ucp\Api\CartServiceInterface" method="create"/>
         <resources>
             <resource ref="anonymous"/>
         </resources>
@@ -145,7 +145,7 @@
 
     <!-- Get Cart -->
     <route url="/V1/ucp/cart/:cartId" method="GET">
-        <service class="Aeqet\Ucp\Api\CartManagementInterface" method="get"/>
+        <service class="Aeqet\Ucp\Api\CartServiceInterface" method="get"/>
         <resources>
             <resource ref="anonymous"/>
         </resources>
@@ -153,7 +153,7 @@
 
     <!-- Add Item to Cart -->
     <route url="/V1/ucp/cart/:cartId/items" method="POST">
-        <service class="Aeqet\Ucp\Api\CartManagementInterface" method="addItem"/>
+        <service class="Aeqet\Ucp\Api\CartServiceInterface" method="addItem"/>
         <resources>
             <resource ref="anonymous"/>
         </resources>
@@ -161,7 +161,7 @@
 
     <!-- Update Item Quantity -->
     <route url="/V1/ucp/cart/:cartId/items/:itemId" method="PUT">
-        <service class="Aeqet\Ucp\Api\CartManagementInterface" method="updateItem"/>
+        <service class="Aeqet\Ucp\Api\CartServiceInterface" method="updateItem"/>
         <resources>
             <resource ref="anonymous"/>
         </resources>
@@ -169,7 +169,7 @@
 
     <!-- Remove Item from Cart -->
     <route url="/V1/ucp/cart/:cartId/items/:itemId" method="DELETE">
-        <service class="Aeqet\Ucp\Api\CartManagementInterface" method="removeItem"/>
+        <service class="Aeqet\Ucp\Api\CartServiceInterface" method="removeItem"/>
         <resources>
             <resource ref="anonymous"/>
         </resources>
@@ -182,7 +182,7 @@
 
     <!-- Get API Schema (Swagger 2.0) -->
     <route url="/V1/ucp/openapi.json" method="GET">
-        <service class="Aeqet\Ucp\Api\OpenApiSchemaManagementInterface" method="getOpenApiSchema"/>
+        <service class="Aeqet\Ucp\Api\OpenApiSchemaServiceInterface" method="getOpenApiSchema"/>
         <resources>
             <resource ref="anonymous"/>
         </resources>

@@ -1,13 +1,13 @@
 <?php
 /**
- * UCP Cart Management Implementation
+ * UCP Cart Service Implementation
  */
 
 declare(strict_types=1);
 
 namespace Aeqet\Ucp\Model;
 
-use Aeqet\Ucp\Api\CartManagementInterface;
+use Aeqet\Ucp\Api\CartServiceInterface;
 use Aeqet\Ucp\Api\Data\CartInterface;
 use Aeqet\Ucp\Api\Data\CartInterfaceFactory;
 use Aeqet\Ucp\Api\Data\CartItemInterface;
@@ -15,7 +15,8 @@ use Aeqet\Ucp\Api\Data\CartItemInterfaceFactory;
 use Aeqet\Ucp\Api\Data\CartItemOptionInterface;
 use Aeqet\Ucp\Api\Data\TotalInterface;
 use Aeqet\Ucp\Api\Data\TotalInterfaceFactory;
-use Magento\Catalog\Api\Data\ProductInterface;
+use Aeqet\Ucp\Model\Utils\MoneyTrait;
+use Aeqet\Ucp\Model\Utils\ProductToUcpConverter;
 use Magento\Catalog\Api\ProductRepositoryInterface;
 use Magento\ConfigurableProduct\Model\Product\Type\Configurable;
 use Magento\Framework\DataObject;
@@ -28,8 +29,10 @@ use Magento\Quote\Model\QuoteIdMaskFactory;
 use Magento\Quote\Model\ResourceModel\Quote\QuoteIdMask as QuoteIdMaskResource;
 use Psr\Log\LoggerInterface;
 
-class CartManagement implements CartManagementInterface
+class CartService implements CartServiceInterface
 {
+    use MoneyTrait;
+
     /**
      * Constructor
      *
@@ -101,22 +104,23 @@ class CartManagement implements CartManagementInterface
 
         $requestData = ['qty' => $quantity];
         if ($product->getTypeId() === Configurable::TYPE_CODE) {
+            $configurableAttributes = $this->configurableType->getConfigurableAttributesAsArray($product);
             if ($options !== null && !empty($options)) {
                 // Convert attribute labels to super_attribute format
-                $superAttributes = $this->convertOptionsToSuperAttributes($product, $options);
+                $superAttributes = $this->convertOptionsToSuperAttributes($configurableAttributes, $options);
                 if (!empty($superAttributes)) {
                     $requestData['super_attribute'] = $superAttributes;
                 } else {
                     throw new LocalizedException(__(
                         'Please specify product options. Available options: %1',
-                        implode(', ', array_keys($this->getAvailableOptions($product)))
+                        implode(', ', array_keys($this->getAvailableOptions($configurableAttributes)))
                     ));
                 }
             } else {
                 throw new LocalizedException(__(
                     'This is a configurable product. Please specify options or use a variant product ID. ' .
                     'Available options: %1',
-                    implode(', ', array_keys($this->getAvailableOptions($product)))
+                    implode(', ', array_keys($this->getAvailableOptions($configurableAttributes)))
                 ));
             }
         }
@@ -125,7 +129,12 @@ class CartManagement implements CartManagementInterface
         $result = $quote->addProduct($product, $request);
 
         if (is_string($result)) {
-            throw new LocalizedException(__($result));
+            $this->logger->warning('Failed to add product to cart', [
+                'product_id' => $productId,
+                'quote_id' => $quote->getId(),
+                'error' => $result
+            ]);
+            throw new LocalizedException(__('Unable to add the selected item to cart.'));
         }
 
         $this->cartRepository->save($quote);
@@ -138,14 +147,13 @@ class CartManagement implements CartManagementInterface
     /**
      * Convert option labels to Magento super_attribute format
      *
-     * @param ProductInterface $product
+     * @param array $configurableAttributes Pre-fetched result of getConfigurableAttributesAsArray()
      * @param CartItemOptionInterface[] $options Options as CartItemOptionInterface array
      * @return array Super attributes as attribute_id => option_id pairs
      */
-    private function convertOptionsToSuperAttributes($product, array $options): array
+    private function convertOptionsToSuperAttributes(array $configurableAttributes, array $options): array
     {
         $superAttributes = [];
-        $configurableAttributes = $this->configurableType->getConfigurableAttributesAsArray($product);
 
         $optionsMap = [];
         foreach ($options as $option) {
@@ -175,13 +183,12 @@ class CartManagement implements CartManagementInterface
     /**
      * Get available options for a configurable product
      *
-     * @param ProductInterface $product
+     * @param array $configurableAttributes Pre-fetched result of getConfigurableAttributesAsArray()
      * @return array Options as attribute_code => [available values]
      */
-    private function getAvailableOptions($product): array
+    private function getAvailableOptions(array $configurableAttributes): array
     {
         $availableOptions = [];
-        $configurableAttributes = $this->configurableType->getConfigurableAttributesAsArray($product);
 
         foreach ($configurableAttributes as $attribute) {
             $attributeCode = $attribute['attribute_code'];
@@ -350,7 +357,7 @@ class CartManagement implements CartManagementInterface
      */
     private function extractCartId(string $cartId): string
     {
-        return str_replace('cart_', '', $cartId);
+        return str_starts_with($cartId, 'cart_') ? substr($cartId, 5) : $cartId;
     }
 
     /**
@@ -361,7 +368,7 @@ class CartManagement implements CartManagementInterface
      */
     private function extractProductId(string $productId): int
     {
-        return (int) str_replace('product_', '', $productId);
+        return (int) (str_starts_with($productId, 'product_') ? substr($productId, 8) : $productId);
     }
 
     /**
@@ -372,17 +379,6 @@ class CartManagement implements CartManagementInterface
      */
     private function extractItemId(string $itemId): int
     {
-        return (int) str_replace('item_', '', $itemId);
-    }
-
-    /**
-     * Convert dollars to cents
-     *
-     * @param float $amount
-     * @return int
-     */
-    private function toCents(float $amount): int
-    {
-        return (int) round($amount * 100);
+        return (int) (str_starts_with($itemId, 'item_') ? substr($itemId, 5) : $itemId);
     }
 }

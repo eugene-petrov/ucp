@@ -5,16 +5,16 @@
 
 declare(strict_types=1);
 
-namespace Aeqet\Ucp\Model;
+namespace Aeqet\Ucp\Model\Utils;
 
 use Aeqet\Ucp\Api\Data\CatalogImageInterface;
 use Aeqet\Ucp\Api\Data\CatalogImageInterfaceFactory;
 use Aeqet\Ucp\Api\Data\CatalogProductInterface;
 use Aeqet\Ucp\Api\Data\CatalogProductInterfaceFactory;
-use Aeqet\Ucp\Api\Data\VariantInterface;
-use Aeqet\Ucp\Api\Data\VariantInterfaceFactory;
 use Aeqet\Ucp\Api\Data\VariantAttributeInterface;
 use Aeqet\Ucp\Api\Data\VariantAttributeInterfaceFactory;
+use Aeqet\Ucp\Api\Data\VariantInterface;
+use Aeqet\Ucp\Api\Data\VariantInterfaceFactory;
 use Exception;
 use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\Catalog\Helper\Image as ImageHelper;
@@ -25,6 +25,7 @@ use Psr\Log\LoggerInterface;
 
 class ProductToUcpConverter
 {
+    use MoneyTrait;
     /**
      * Constructor
      *
@@ -303,8 +304,7 @@ class ProductToUcpConverter
     private function isInStock(ProductInterface $product): bool
     {
         try {
-            $stockItem = $this->stockRegistry->getStockItem($product->getId());
-            return $stockItem->getIsInStock();
+            return $this->stockRegistry->getStockItem($product->getId())->getIsInStock();
         } catch (Exception $e) {
             $this->logger->debug('Unable to get product stock status', [
                 'product_id' => $product->getId(),
@@ -371,16 +371,5 @@ class ProductToUcpConverter
         }
 
         return (string) $value;
-    }
-
-    /**
-     * Convert dollars to cents
-     *
-     * @param float $amount
-     * @return int
-     */
-    private function toCents(float $amount): int
-    {
-        return (int) round($amount * 100);
     }
 }

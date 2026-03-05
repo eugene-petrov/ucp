@@ -7,7 +7,7 @@ namespace Aeqet\Ucp\Tests\Unit\Model\Webhook;
 use Aeqet\Ucp\Model\Data\Webhook\SignatureResult;
 use Aeqet\Ucp\Model\Data\Webhook\SignatureResultFactory;
 use Aeqet\Ucp\Model\Security\KeyManager;
-use Aeqet\Ucp\Model\SigningKeyEntity;
+use Aeqet\Ucp\Model\Security\SigningKeyEntity;
 use Aeqet\Ucp\Model\Webhook\Signer;
 use Magento\Framework\Exception\LocalizedException;
 use PHPUnit\Framework\MockObject\MockObject;

@@ -20,6 +20,8 @@ This module implements the Google UCP (Universal Commerce Protocol) specificatio
 - **Buyer Information** - Customer email, name, and phone
 - **Payment Handlers** - Delegated payment configuration
 - **Fulfillment Options** - Available shipping methods with pricing
+- **Fulfillment Address** - Accept shipping/billing address via PUT checkout session, map to Magento quote address, trigger shipping rate recalculation
+- **Shipping Method Selection** - `selectedFulfillmentId` in PUT checkout session sets the shipping method; enables `ready_for_complete` status transition
 - **Order Creation** - Complete checkout and create Magento order
 - **Catalog API** - Product search, get by ID/SKU, category browsing
 - **Cart API** - Create cart, add/update/remove items
@@ -156,11 +158,6 @@ This section documents what remains to fully implement the Google Universal Comm
   - Create `Aeqet\Ucp\Model\Webhook\Dispatcher` for sending webhooks
   - Implement retry logic with exponential backoff
   - Add webhook registration API
-
-- [ ] **Fulfillment Address Handling**
-  - Accept shipping address in checkout session update
-  - Validate address and recalculate shipping rates
-  - Support address validation services
 
 - [ ] **Payment Status Integration**
   - Track payment status separately from order status

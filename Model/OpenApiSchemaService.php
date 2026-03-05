@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Aeqet\Ucp\Model;
 
-use Aeqet\Ucp\Api\OpenApiSchemaManagementInterface;
+use Aeqet\Ucp\Api\OpenApiSchemaServiceInterface;
 use Magento\Framework\Webapi\Rest\Request;
 use Magento\Webapi\Controller\Rest as RestController;
 use Magento\Webapi\Model\Rest\Swagger\Generator as SwaggerGenerator;
 
-class OpenApiSchemaManagement implements OpenApiSchemaManagementInterface
+class OpenApiSchemaService implements OpenApiSchemaServiceInterface
 {
     /**
      * Constructor.
@@ -46,7 +46,7 @@ class OpenApiSchemaManagement implements OpenApiSchemaManagementInterface
         return array_values(array_filter(
             $this->swaggerGenerator->getListOfServices(),
             static fn(string $name): bool => str_starts_with($name, 'aeqetUcp')
-                && $name !== 'aeqetUcpOpenApiSchemaManagementV1'
+                && $name !== 'aeqetUcpOpenApiSchemaServiceV1'
         ));
     }
 

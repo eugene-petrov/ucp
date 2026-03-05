@@ -5,8 +5,10 @@
 
 declare(strict_types=1);
 
-namespace Aeqet\Ucp\Model;
+namespace Aeqet\Ucp\Model\Checkout;
 
+use Aeqet\Ucp\Api\Data\AddressInterface;
+use Aeqet\Ucp\Api\Data\AddressInterfaceFactory;
 use Aeqet\Ucp\Api\Data\BuyerInterface;
 use Aeqet\Ucp\Api\Data\BuyerInterfaceFactory;
 use Aeqet\Ucp\Api\Data\CapabilityInterfaceFactory;
@@ -27,6 +29,8 @@ use Aeqet\Ucp\Api\Data\TotalInterfaceFactory;
 use Aeqet\Ucp\Api\Data\UcpMetaInterface;
 use Aeqet\Ucp\Api\Data\UcpMetaInterfaceFactory;
 use Aeqet\Ucp\Model\Config\Config;
+use Aeqet\Ucp\Model\Utils\MoneyTrait;
+use Aeqet\Ucp\Model\Utils\UcpConstants;
 use DateTime;
 use DateTimeZone;
 use Exception;
@@ -37,10 +41,10 @@ use Psr\Log\LoggerInterface;
 
 class QuoteToUcpConverter
 {
-    private const UCP_VERSION = '2026-01-23';
+    use MoneyTrait;
+
     private const CAPABILITY_CHECKOUT = 'dev.ucp.shopping.checkout';
     private const CAPABILITY_CATALOG = 'dev.ucp.shopping.catalog';
-    private const PAYMENT_HANDLER_DELEGATE = 'dev.ucp.delegate_payment';
 
     /**
      * Constructor
@@ -50,6 +54,7 @@ class QuoteToUcpConverter
      * @param ItemDataInterfaceFactory $itemDataFactory
      * @param TotalInterfaceFactory $totalFactory
      * @param BuyerInterfaceFactory $buyerFactory
+     * @param AddressInterfaceFactory $addressFactory
      * @param PaymentInterfaceFactory $paymentFactory
      * @param PaymentHandlerInterfaceFactory $paymentHandlerFactory
      * @param LinkInterfaceFactory $linkFactory
@@ -67,6 +72,7 @@ class QuoteToUcpConverter
         private readonly ItemDataInterfaceFactory $itemDataFactory,
         private readonly TotalInterfaceFactory $totalFactory,
         private readonly BuyerInterfaceFactory $buyerFactory,
+        private readonly AddressInterfaceFactory $addressFactory,
         private readonly PaymentInterfaceFactory $paymentFactory,
         private readonly PaymentHandlerInterfaceFactory $paymentHandlerFactory,
         private readonly LinkInterfaceFactory $linkFactory,
@@ -99,6 +105,8 @@ class QuoteToUcpConverter
         $session->setLineItems($this->createLineItems($quote));
         $session->setTotals($this->createTotals($quote));
         $session->setBuyer($this->createBuyer($quote));
+        $session->setFulfillmentAddress($this->createFulfillmentAddress($quote));
+        $session->setSelectedFulfillmentId($this->getSelectedFulfillmentId($quote));
         $session->setPayment($this->createPayment());
         $session->setFulfillmentOptions($this->createFulfillmentOptions($quote));
         $session->setLinks($this->createLinks($maskedId));
@@ -157,14 +165,14 @@ class QuoteToUcpConverter
     {
         $checkoutCapability = $this->capabilityFactory->create();
         $checkoutCapability->setName(self::CAPABILITY_CHECKOUT);
-        $checkoutCapability->setVersion(self::UCP_VERSION);
+        $checkoutCapability->setVersion(UcpConstants::UCP_VERSION);
 
         $catalogCapability = $this->capabilityFactory->create();
         $catalogCapability->setName(self::CAPABILITY_CATALOG);
-        $catalogCapability->setVersion(self::UCP_VERSION);
+        $catalogCapability->setVersion(UcpConstants::UCP_VERSION);
 
         $ucpMeta = $this->ucpMetaFactory->create();
-        $ucpMeta->setVersion(self::UCP_VERSION);
+        $ucpMeta->setVersion(UcpConstants::UCP_VERSION);
         $ucpMeta->setCapabilities([$checkoutCapability, $catalogCapability]);
 
         return $ucpMeta;
@@ -233,8 +241,10 @@ class QuoteToUcpConverter
         $totals[] = $subtotal;
 
         $discountAmount = 0;
+        $taxAmount = 0;
         foreach ($quote->getAllVisibleItems() as $item) {
             $discountAmount += (float) $item->getDiscountAmount();
+            $taxAmount += (float) $item->getTaxAmount();
         }
         if ($discountAmount > 0) {
             $discount = $this->totalFactory->create();
@@ -253,13 +263,6 @@ class QuoteToUcpConverter
                 $shipping->setDisplayText('Shipping');
                 $totals[] = $shipping;
             }
-        }
-
-        $taxAmount = 0;
-        foreach ($quote->getAllVisibleItems() as $item) {
-            $taxAmount += (float) $item->getTaxAmount();
-        }
-        if (!$quote->isVirtual() && $quote->getShippingAddress()) {
             $taxAmount += (float) $quote->getShippingAddress()->getTaxAmount();
         }
         if ($taxAmount > 0) {
@@ -314,6 +317,57 @@ class QuoteToUcpConverter
     }
 
     /**
+     * Create fulfillment address from quote shipping address
+     *
+     * @param CartInterface $quote
+     * @return AddressInterface|null
+     */
+    private function createFulfillmentAddress(CartInterface $quote): ?AddressInterface
+    {
+        if ($quote->isVirtual()) {
+            return null;
+        }
+
+        $shippingAddress = $quote->getShippingAddress();
+        if (!$shippingAddress || !$shippingAddress->getStreetLine(1)) {
+            return null;
+        }
+
+        $address = $this->addressFactory->create();
+        $address->setFirstName($shippingAddress->getFirstname() ?: null);
+        $address->setLastName($shippingAddress->getLastname() ?: null);
+        $address->setStreetLine1($shippingAddress->getStreetLine(1) ?: null);
+        $address->setStreetLine2($shippingAddress->getStreetLine(2) ?: null);
+        $address->setCity($shippingAddress->getCity() ?: null);
+        $address->setState($shippingAddress->getRegion() ?: null);
+        $address->setPostalCode($shippingAddress->getPostcode() ?: null);
+        $address->setCountryCode($shippingAddress->getCountryId() ?: null);
+        $address->setPhone($shippingAddress->getTelephone() ?: null);
+
+        return $address;
+    }
+
+    /**
+     * Get selected fulfillment (shipping method) ID from quote
+     *
+     * @param CartInterface $quote
+     * @return string|null
+     */
+    private function getSelectedFulfillmentId(CartInterface $quote): ?string
+    {
+        if ($quote->isVirtual()) {
+            return null;
+        }
+
+        $shippingAddress = $quote->getShippingAddress();
+        if (!$shippingAddress) {
+            return null;
+        }
+
+        return $shippingAddress->getShippingMethod() ?: null;
+    }
+
+    /**
      * Create payment section with default delegate handler
      *
      * @return PaymentInterface
@@ -322,8 +376,8 @@ class QuoteToUcpConverter
     {
         $handler = $this->paymentHandlerFactory->create();
         $handler->setId('handler_1');
-        $handler->setName(self::PAYMENT_HANDLER_DELEGATE);
-        $handler->setVersion(self::UCP_VERSION);
+        $handler->setName($this->config->getPaymentHandlerName());
+        $handler->setVersion(UcpConstants::UCP_VERSION);
         $handler->setConfig([]);
 
         $payment = $this->paymentFactory->create();
@@ -351,12 +405,12 @@ class QuoteToUcpConverter
 
         $tosLink = $this->linkFactory->create();
         $tosLink->setRel(LinkInterface::REL_TERMS_OF_SERVICE);
-        $tosLink->setHref($baseUrl . '/terms');
+        $tosLink->setHref($baseUrl . $this->config->getTosUrlSuffix());
         $links[] = $tosLink;
 
         $privacyLink = $this->linkFactory->create();
         $privacyLink->setRel(LinkInterface::REL_PRIVACY_POLICY);
-        $privacyLink->setHref($baseUrl . '/privacy');
+        $privacyLink->setHref($baseUrl . $this->config->getPrivacyUrlSuffix());
         $links[] = $privacyLink;
 
         return $links;
@@ -401,16 +455,5 @@ class QuoteToUcpConverter
         }
 
         return $options;
-    }
-
-    /**
-     * Convert dollars to cents
-     *
-     * @param float $amount
-     * @return int
-     */
-    private function toCents(float $amount): int
-    {
-        return (int) round($amount * 100);
     }
 }

@@ -1,6 +1,6 @@
 <?php
 /**
- * UCP Catalog Product Management Interface
+ * UCP Catalog Product Service Interface
  */
 
 declare(strict_types=1);
@@ -16,7 +16,7 @@ use Magento\Framework\Exception\NoSuchEntityException;
  *
  * @api
  */
-interface CatalogProductManagementInterface
+interface CatalogProductServiceInterface
 {
     /**
      * Search products

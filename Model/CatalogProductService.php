@@ -1,16 +1,17 @@
 <?php
 /**
- * UCP Catalog Product Management Implementation
+ * UCP Catalog Product Service Implementation
  */
 
 declare(strict_types=1);
 
 namespace Aeqet\Ucp\Model;
 
-use Aeqet\Ucp\Api\CatalogProductManagementInterface;
+use Aeqet\Ucp\Api\CatalogProductServiceInterface;
 use Aeqet\Ucp\Api\Data\CatalogProductInterface;
 use Aeqet\Ucp\Api\Data\CatalogProductSearchResultsInterface;
 use Aeqet\Ucp\Api\Data\CatalogProductSearchResultsInterfaceFactory;
+use Aeqet\Ucp\Model\Utils\ProductToUcpConverter;
 use Magento\Catalog\Api\ProductRepositoryInterface;
 use Magento\Catalog\Model\Product\Attribute\Source\Status;
 use Magento\Catalog\Model\Product\Visibility;
@@ -18,7 +19,7 @@ use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory as ProductColl
 use Magento\Framework\Exception\NoSuchEntityException;
 use Psr\Log\LoggerInterface;
 
-class CatalogProductManagement implements CatalogProductManagementInterface
+class CatalogProductService implements CatalogProductServiceInterface
 {
     /**
      * Constructor

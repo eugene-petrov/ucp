@@ -1,6 +1,6 @@
 <?php
 /**
- * UCP Cart Management Interface
+ * UCP Cart Service Interface
  */
 
 declare(strict_types=1);
@@ -9,7 +9,7 @@ namespace Aeqet\Ucp\Api;
 
 use Aeqet\Ucp\Api\Data\CartInterface;
 
-interface CartManagementInterface
+interface CartServiceInterface
 {
     /**
      * Create a new cart

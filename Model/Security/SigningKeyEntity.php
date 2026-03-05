@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Aeqet\Ucp\Model;
+namespace Aeqet\Ucp\Model\Security;
 
 use Aeqet\Ucp\Model\ResourceModel\SigningKey as SigningKeyResource;
 use Magento\Framework\Model\AbstractModel;

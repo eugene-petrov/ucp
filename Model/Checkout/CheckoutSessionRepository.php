@@ -7,7 +7,7 @@
 
 declare(strict_types=1);
 
-namespace Aeqet\Ucp\Model;
+namespace Aeqet\Ucp\Model\Checkout;
 
 use Aeqet\Ucp\Api\Data\CheckoutSessionInterface;
 use Aeqet\Ucp\Model\ResourceModel\CheckoutSession as CheckoutSessionResource;
@@ -163,7 +163,16 @@ class CheckoutSessionRepository
             );
         }
 
-        return $entity->getMaskedQuoteId();
+        $maskedQuoteId = $entity->getMaskedQuoteId();
+
+        $session = $this->serializer->deserialize($entity->getUcpData());
+        $this->sessionCache[$sessionId] = [
+            'session' => $session,
+            'maskedQuoteId' => $maskedQuoteId
+        ];
+        $this->quoteToSessionCache[$maskedQuoteId] = $sessionId;
+
+        return $maskedQuoteId;
     }
 
     /**
@@ -200,38 +209,5 @@ class CheckoutSessionRepository
         }
 
         return $this->resource->sessionExists($sessionId);
-    }
-
-    /**
-     * Delete a checkout session
-     *
-     * @param string $sessionId
-     * @return void
-     */
-    public function delete(string $sessionId): void
-    {
-        if (isset($this->sessionCache[$sessionId])) {
-            $maskedQuoteId = $this->sessionCache[$sessionId]['maskedQuoteId'];
-            unset($this->quoteToSessionCache[$maskedQuoteId]);
-            unset($this->sessionCache[$sessionId]);
-        }
-
-        $rowsDeleted = $this->resource->deleteBySessionId($sessionId);
-
-        $this->logger->debug('Checkout session deleted', [
-            'session_id' => $sessionId,
-            'rows_deleted' => $rowsDeleted
-        ]);
-    }
-
-    /**
-     * Clear the request-level cache
-     *
-     * @return void
-     */
-    public function clearCache(): void
-    {
-        $this->sessionCache = [];
-        $this->quoteToSessionCache = [];
     }
 }
