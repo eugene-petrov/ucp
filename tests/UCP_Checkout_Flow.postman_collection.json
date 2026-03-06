@@ -780,6 +780,11 @@
 							{
 								"key": "Content-Type",
 								"value": "application/json"
+							},
+							{
+								"key": "UCP-Agent",
+								"value": "profile=\"{{ucp_agent_profile_uri}}\"",
+								"type": "text"
 							}
 						],
 						"url": {
@@ -830,6 +835,11 @@
 							{
 								"key": "Content-Type",
 								"value": "application/json"
+							},
+							{
+								"key": "UCP-Agent",
+								"value": "profile=\"{{ucp_agent_profile_uri}}\"",
+								"type": "text"
 							}
 						],
 						"body": {
@@ -880,6 +890,11 @@
 							{
 								"key": "Content-Type",
 								"value": "application/json"
+							},
+							{
+								"key": "UCP-Agent",
+								"value": "profile=\"{{ucp_agent_profile_uri}}\"",
+								"type": "text"
 							}
 						],
 						"body": {
@@ -925,7 +940,21 @@
 									"});",
 									"",
 									"pm.collectionVariables.set(\"agent_ucp_session_id\", jsonData.id);",
-									"console.log(\"UCP Session: \" + jsonData.id + \" | status: \" + jsonData.status);"
+									"console.log(\"UCP Session: \" + jsonData.id + \" | status: \" + jsonData.status);",
+									"",
+									"pm.test(\"ucp.capabilities is an array\", function () {",
+									"    var ucp = pm.response.json().ucp;",
+									"    pm.expect(ucp).to.have.property(\"capabilities\");",
+									"    pm.expect(ucp.capabilities).to.be.an(\"array\");",
+									"});",
+									"",
+									"pm.test(\"ucp.capabilities items have name and version\", function () {",
+									"    var caps = pm.response.json().ucp.capabilities;",
+									"    caps.forEach(function(cap) {",
+									"        pm.expect(cap).to.have.property(\"name\").that.is.a(\"string\");",
+									"        pm.expect(cap).to.have.property(\"version\").that.is.a(\"string\");",
+									"    });",
+									"});"
 								],
 								"type": "text/javascript"
 							}
@@ -937,6 +966,11 @@
 							{
 								"key": "Content-Type",
 								"value": "application/json"
+							},
+							{
+								"key": "UCP-Agent",
+								"value": "profile=\"{{ucp_agent_profile_uri}}\"",
+								"type": "text"
 							}
 						],
 						"body": {
@@ -1001,6 +1035,11 @@
 							{
 								"key": "Content-Type",
 								"value": "application/json"
+							},
+							{
+								"key": "UCP-Agent",
+								"value": "profile=\"{{ucp_agent_profile_uri}}\"",
+								"type": "text"
 							}
 						],
 						"body": {
@@ -1058,6 +1097,11 @@
 							{
 								"key": "Content-Type",
 								"value": "application/json"
+							},
+							{
+								"key": "UCP-Agent",
+								"value": "profile=\"{{ucp_agent_profile_uri}}\"",
+								"type": "text"
 							}
 						],
 						"body": {
@@ -1112,6 +1156,11 @@
 							{
 								"key": "Content-Type",
 								"value": "application/json"
+							},
+							{
+								"key": "UCP-Agent",
+								"value": "profile=\"{{ucp_agent_profile_uri}}\"",
+								"type": "text"
 							}
 						],
 						"body": {
@@ -1736,6 +1785,11 @@
 		},
 		{
 			"key": "agent_fulfillment_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "ucp_agent_profile_uri",
 			"value": "",
 			"type": "string"
 		}

@@ -166,14 +166,6 @@ This section documents what remains to fully implement the Universal Commerce Pr
 
 ### Medium Priority
 
-- [ ] **Capability Negotiation (UCP-Agent Header)**
-  - Read `UCP-Agent` header (RFC 8941 Dictionary) from incoming REST requests
-  - Fetch the platform's capability profile from the URI it provides
-  - Compute the intersection of merchant and platform capabilities
-  - Return only the active (intersected) capabilities in each response
-  - Remove orphaned extensions whose parents are not in the intersection
-  - This is a compliance requirement per the UCP specification
-
 - [ ] **Identity Linking (OAuth 2.0)**
   - Implement OAuth 2.0 authorization server
   - Support authorization code flow for customer linking
