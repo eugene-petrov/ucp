@@ -30,6 +30,7 @@ use Aeqet\Ucp\Api\Data\UcpMetaInterface;
 use Aeqet\Ucp\Api\Data\UcpMetaInterfaceFactory;
 use Aeqet\Ucp\Model\Config\Config;
 use Aeqet\Ucp\Model\Utils\MoneyTrait;
+use Aeqet\Ucp\Model\Utils\ReverseDomainResolver;
 use Aeqet\Ucp\Model\Utils\UcpConstants;
 use DateTime;
 use DateTimeZone;
@@ -42,9 +43,6 @@ use Psr\Log\LoggerInterface;
 class QuoteToUcpConverter
 {
     use MoneyTrait;
-
-    private const CAPABILITY_CHECKOUT = 'dev.ucp.shopping.checkout';
-    private const CAPABILITY_CATALOG = 'dev.ucp.shopping.catalog';
 
     /**
      * Constructor
@@ -65,6 +63,7 @@ class QuoteToUcpConverter
      * @param ImageHelper $imageHelper
      * @param LoggerInterface $logger
      * @param Config $config
+     * @param ReverseDomainResolver $reverseDomainResolver
      */
     public function __construct(
         private readonly CheckoutSessionInterfaceFactory $checkoutSessionFactory,
@@ -82,7 +81,8 @@ class QuoteToUcpConverter
         private readonly StoreManagerInterface $storeManager,
         private readonly ImageHelper $imageHelper,
         private readonly LoggerInterface $logger,
-        private readonly Config $config
+        private readonly Config $config,
+        private readonly ReverseDomainResolver $reverseDomainResolver
     ) {
     }
 
@@ -163,12 +163,15 @@ class QuoteToUcpConverter
      */
     private function createUcpMeta(): UcpMetaInterface
     {
+        $baseUrl = rtrim($this->storeManager->getStore()->getBaseUrl(), '/');
+        $ns = $this->reverseDomainResolver->getReverseDomain($baseUrl);
+
         $checkoutCapability = $this->capabilityFactory->create();
-        $checkoutCapability->setName(self::CAPABILITY_CHECKOUT);
+        $checkoutCapability->setName('dev.ucp.shopping.checkout');
         $checkoutCapability->setVersion(UcpConstants::UCP_VERSION);
 
         $catalogCapability = $this->capabilityFactory->create();
-        $catalogCapability->setName(self::CAPABILITY_CATALOG);
+        $catalogCapability->setName($ns . '.shopping.catalog');
         $catalogCapability->setVersion(UcpConstants::UCP_VERSION);
 
         $ucpMeta = $this->ucpMetaFactory->create();

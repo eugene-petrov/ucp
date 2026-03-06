@@ -7,22 +7,25 @@ namespace Aeqet\Ucp\Model\Manifest;
 use Aeqet\Ucp\Api\ManifestGeneratorInterface;
 use Aeqet\Ucp\Model\Config\Config;
 use Aeqet\Ucp\Model\Security\KeyManager;
+use Aeqet\Ucp\Model\Utils\ReverseDomainResolver;
 use Aeqet\Ucp\Model\Utils\UcpConstants;
 use Magento\Store\Model\StoreManagerInterface;
 
 class Generator implements ManifestGeneratorInterface
 {
-    private const UCP_SPEC_BASE = 'https://ucp.dev/specification/';
+    private const UCP_SPEC_BASE = 'https://ucp.dev/latest/specification/';
 
     /**
      * @param StoreManagerInterface $storeManager
      * @param Config $config
      * @param KeyManager $keyManager
+     * @param ReverseDomainResolver $reverseDomainResolver
      */
     public function __construct(
         private readonly StoreManagerInterface $storeManager,
         private readonly Config $config,
-        private readonly KeyManager $keyManager
+        private readonly KeyManager $keyManager,
+        private readonly ReverseDomainResolver $reverseDomainResolver
     ) {
     }
 
@@ -47,9 +50,7 @@ class Generator implements ManifestGeneratorInterface
                     ],
                 ],
                 'capabilities' => $this->buildCapabilities(),
-            ],
-            'payment' => [
-                'handlers' => $this->buildPaymentHandlers($baseUrl),
+                'payment_handlers' => $this->buildPaymentHandlers($baseUrl),
             ],
             'signing_keys' => $this->keyManager->getActivePublicKeysAsJwk(),
         ];
@@ -94,14 +95,15 @@ class Generator implements ManifestGeneratorInterface
     private function buildCapabilities(): array
     {
         $capabilities = [];
+        $ns = $this->reverseDomainResolver->getReverseDomain($this->getBaseUrl());
 
         if ($this->config->isCheckoutCapabilityEnabled()) {
             $capabilities['dev.ucp.shopping.checkout'] = [$this->createCapability('checkout')];
-            $capabilities['dev.ucp.shopping.cart'] = [$this->createCapability('cart')];
+            $capabilities[$ns . '.shopping.cart'] = [$this->createCapability('cart')];
         }
 
         if ($this->config->isCatalogCapabilityEnabled()) {
-            $capabilities['dev.ucp.shopping.catalog'] = [$this->createCapability('catalog')];
+            $capabilities[$ns . '.shopping.catalog'] = [$this->createCapability('catalog')];
         }
 
         return $capabilities;
@@ -126,18 +128,34 @@ class Generator implements ManifestGeneratorInterface
     }
 
     /**
-     * Build payment handlers array for manifest
+     * Build payment_handlers map for manifest (inside ucp object)
+     *
+     * Returns a namespace-keyed object as required by the UCP spec:
+     * { "com.example.handler_id": [{ "id": ..., "version": ..., "spec": ..., "schema": ..., "config": {...} }] }
      *
      * @param string $baseUrl
-     * @return array
+     * @return array<string, array>
      */
     private function buildPaymentHandlers(string $baseUrl): array
     {
+        $handlerType = $this->config->getPaymentHandlerType();
+        $handlerName = $this->config->getPaymentHandlerName();
+        $ns = $this->reverseDomainResolver->getReverseDomain($baseUrl);
+        $namespaceKey = $ns . '.payment.' . $handlerType;
+
         return [
-            [
-                'type' => $this->config->getPaymentHandlerType(),
-                'name' => $this->config->getPaymentHandlerName(),
-                'url' => $baseUrl . '/checkout',
+            $namespaceKey => [
+                [
+                    'id' => $handlerType . '-handler',
+                    'version' => UcpConstants::UCP_VERSION,
+                    'spec' => self::UCP_SPEC_BASE . 'payment-handlers/' . $handlerType,
+                    'schema' => 'https://ucp.dev/' . UcpConstants::UCP_VERSION
+                        . '/schemas/payment-handlers/' . $handlerType . '.json',
+                    'config' => [
+                        'name' => $handlerName,
+                        'url' => $baseUrl . '/checkout',
+                    ],
+                ],
             ],
         ];
     }
