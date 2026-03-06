@@ -28,6 +28,8 @@ use Aeqet\Ucp\Api\Data\TotalInterface;
 use Aeqet\Ucp\Api\Data\TotalInterfaceFactory;
 use Aeqet\Ucp\Api\Data\UcpMetaInterface;
 use Aeqet\Ucp\Api\Data\UcpMetaInterfaceFactory;
+use Aeqet\Ucp\Model\Capability\Negotiator;
+use Aeqet\Ucp\Model\Capability\PlatformProfileFetcher;
 use Aeqet\Ucp\Model\Config\Config;
 use Aeqet\Ucp\Model\Utils\MoneyTrait;
 use Aeqet\Ucp\Model\Utils\ReverseDomainResolver;
@@ -38,6 +40,7 @@ use Exception;
 use Magento\Catalog\Helper\Image as ImageHelper;
 use Magento\Quote\Api\Data\CartInterface;
 use Magento\Store\Model\StoreManagerInterface;
+use Magento\Framework\Webapi\Rest\Request;
 use Psr\Log\LoggerInterface;
 
 class QuoteToUcpConverter
@@ -64,6 +67,9 @@ class QuoteToUcpConverter
      * @param LoggerInterface $logger
      * @param Config $config
      * @param ReverseDomainResolver $reverseDomainResolver
+     * @param Request $request
+     * @param PlatformProfileFetcher $profileFetcher
+     * @param Negotiator $negotiator
      */
     public function __construct(
         private readonly CheckoutSessionInterfaceFactory $checkoutSessionFactory,
@@ -82,7 +88,10 @@ class QuoteToUcpConverter
         private readonly ImageHelper $imageHelper,
         private readonly LoggerInterface $logger,
         private readonly Config $config,
-        private readonly ReverseDomainResolver $reverseDomainResolver
+        private readonly ReverseDomainResolver $reverseDomainResolver,
+        private readonly Request $request,
+        private readonly PlatformProfileFetcher $profileFetcher,
+        private readonly Negotiator $negotiator
     ) {
     }
 
@@ -174,9 +183,18 @@ class QuoteToUcpConverter
         $catalogCapability->setName($ns . '.shopping.catalog');
         $catalogCapability->setVersion(UcpConstants::UCP_VERSION);
 
+        $merchantCaps = [$checkoutCapability, $catalogCapability];
+
+        // Capability negotiation via UCP-Agent header (RFC 8941 Dictionary)
+        $ucpAgentHeader = $this->request->getHeader('UCP-Agent');
+        if ($ucpAgentHeader && preg_match('/\bprofile\s*=\s*"([^"]+)"/', $ucpAgentHeader, $m)) {
+            $platformNames = $this->profileFetcher->fetchCapabilityNames($m[1]);
+            $merchantCaps = $this->negotiator->intersect($merchantCaps, $platformNames);
+        }
+
         $ucpMeta = $this->ucpMetaFactory->create();
         $ucpMeta->setVersion(UcpConstants::UCP_VERSION);
-        $ucpMeta->setCapabilities([$checkoutCapability, $catalogCapability]);
+        $ucpMeta->setCapabilities($merchantCaps);
 
         return $ucpMeta;
     }
