@@ -6,7 +6,7 @@
 
 ## Overview
 
-This module implements the Google UCP (Universal Commerce Protocol) specification version 2026-01-23 for Magento 2. It provides REST API endpoints to create and manage checkout sessions that can be used by external payment and checkout systems.
+This module implements the UCP (Universal Commerce Protocol) specification version 2026-01-23 for Magento 2. It provides REST API endpoints to create and manage checkout sessions that can be used by external payment and checkout systems.
 
 **Current Status:** MVP Implementation
 
@@ -143,7 +143,7 @@ The public key will be included in the `signing_keys` array of the UCP manifest 
 
 ## TODO - Roadmap to Full UCP Compliance
 
-This section documents what remains to fully implement the Google Universal Commerce Protocol for Magento 2.
+This section documents what remains to fully implement the Universal Commerce Protocol for Magento 2.
 
 ### High Priority
 
@@ -165,6 +165,14 @@ This section documents what remains to fully implement the Google Universal Comm
   - Integrate with Magento payment gateways
 
 ### Medium Priority
+
+- [ ] **Capability Negotiation (UCP-Agent Header)**
+  - Read `UCP-Agent` header (RFC 8941 Dictionary) from incoming REST requests
+  - Fetch the platform's capability profile from the URI it provides
+  - Compute the intersection of merchant and platform capabilities
+  - Return only the active (intersected) capabilities in each response
+  - Remove orphaned extensions whose parents are not in the intersection
+  - This is a compliance requirement per the UCP specification
 
 - [ ] **Identity Linking (OAuth 2.0)**
   - Implement OAuth 2.0 authorization server
