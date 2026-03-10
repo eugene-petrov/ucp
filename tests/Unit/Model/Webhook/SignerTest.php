@@ -57,7 +57,6 @@ class SignerTest extends TestCase
         $result = $this->signer->sign('{"hello":"world"}');
         $detachedJwt = $result->getSignature();
 
-        // Detached JWT: header_b64..signature_b64 (empty payload section)
         $parts = explode('.', $detachedJwt);
         $this->assertCount(3, $parts, 'Detached JWT must have exactly 3 dot-separated parts');
         $this->assertNotEmpty($parts[0], 'Header must not be empty');
@@ -92,11 +91,9 @@ class SignerTest extends TestCase
         $headerB64 = $parts[0];
         $signatureB64 = $parts[2];
 
-        // Reconstruct signing input as the signer did
         $payloadB64 = $this->base64UrlEncode($payload);
         $signingInput = $headerB64 . '.' . $payloadB64;
 
-        // Verify with the public key
         $publicKey = openssl_pkey_get_public($this->keyPair['public']);
         $this->assertNotFalse($publicKey, 'Must be able to load test public key');
 
@@ -114,7 +111,6 @@ class SignerTest extends TestCase
 
         $this->assertStringStartsWith('sig1=:', $headerValue);
         $this->assertStringEndsWith(':', $headerValue);
-        // sig1=:<header>..<sig>:
         $inner = substr($headerValue, 6, -1);
         $parts = explode('.', $inner);
         $this->assertCount(3, $parts);

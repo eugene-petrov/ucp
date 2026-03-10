@@ -32,6 +32,18 @@ This module implements the UCP (Universal Commerce Protocol) specification versi
 - **Signing Keys** - ECDSA P-256 key generation for webhook signature verification (UCP compliance)
 - **Webhook Signer** - Detached JWT (RFC 7797) payload signing with ES256 via `Aeqet\Ucp\Model\Webhook\Signer`
 - **OpenAPI Schema Endpoint** - Swagger 2.0 schema for all UCP endpoints at `GET /rest/V1/ucp/openapi.json`
+- **Webhook Delivery Processor** - `Aeqet\Ucp\Model\Webhook\DeliveryProcessor` delivers queued webhooks via HTTP POST signed with `X-Webhook-Signature` (ES256 JWT); exponential backoff retry up to 6 attempts (1 min → 5 min → 30 min → 2 h → 8 h → 24 h)
+- **Webhook Event Builder** - `Aeqet\Ucp\Model\Webhook\EventBuilder` constructs order event payloads (event ID, type, timestamp, order data, UCP session ID)
+- **Order Lifecycle Observers** - Magento events wired to UCP webhook dispatcher:
+  - `sales_order_place_after` → `order.created`
+  - `sales_order_save_after` → `order.updated`
+  - `sales_shipment_save_after` → `order.shipped`
+  - `sales_order_cancel_after` → `order.canceled`
+  - `sales_creditmemo_save_after` → `order.refunded`
+- **Cron Job** - `aeqet_ucp_webhook_deliveries` runs every minute to process pending webhook deliveries
+- **Capability Negotiation** - `Aeqet\Ucp\Model\Capability\Negotiator` intersects merchant capabilities with platform-supported capabilities (fail-open: returns all merchant capabilities if platform list is empty)
+- **Platform Profile Fetcher** - `Aeqet\Ucp\Model\Capability\PlatformProfileFetcher` fetches remote UCP platform profiles (HTTPS-only, in-memory cache, fail-open on error)
+- **UCP-Native Webhook Dispatch** - `Dispatcher::dispatch()` reads `platform_profile_uri` from the checkout session (stored from `UCP-Agent: profile="..."` header at session creation), fetches the platform's `/.well-known/ucp` profile, extracts `config.webhook_url` from the `dev.ucp.shopping.order` capability, and queues a `WebhookDelivery` record for async delivery by `DeliveryProcessor`
 
 ---
 
@@ -147,18 +159,6 @@ This section documents what remains to fully implement the Universal Commerce Pr
 
 ### High Priority
 
-- [ ] **Order Capability (Webhook Lifecycle Events)**
-  - Implement webhook endpoints for order lifecycle:
-    - `order.created` - Order placed
-    - `order.updated` - Order status changed
-    - `order.shipped` - Shipment created
-    - `order.delivered` - Order delivered
-    - `order.canceled` - Order canceled
-    - `order.refunded` - Refund processed
-  - Create `Aeqet\Ucp\Model\Webhook\Dispatcher` for sending webhooks
-  - Implement retry logic with exponential backoff
-  - Add webhook registration API
-
 - [ ] **Payment Status Integration**
   - Track payment status separately from order status
   - Support partial payments and refunds
@@ -226,9 +226,18 @@ This section documents what remains to fully implement the Universal Commerce Pr
 - [ ] **Integration Tests**
   - PHPUnit tests for all API endpoints
   - Test checkout flow end-to-end
-  - Test webhook delivery
+  - Test webhook delivery end-to-end
 
 - [ ] **API Documentation**
   - Swagger UI integration
   - Request/response examples
   - Error code documentation
+
+# Docs
+
+- [Universal Commerce Protocol (UCP) Java Implementation](https://medium.com/@visrow/universal-commerce-protocol-ucp-java-implementation-building-ai-agent-enabled-checkout-and-1d6d5552084a)
+- [Under the Hood: Universal Commerce Protocol (UCP)](https://developers.googleblog.com/under-the-hood-universal-commerce-protocol-ucp/)
+- [Order Capability Specification](https://ucp.md/en/specification/order/)
+- [How to Implement Universal Commerce Protocol (UCP) in 2026: Complete /.well-known/ucp Setup Guide](https://wearepresta.com/how-to-implement-universal-commerce-protocol-ucp-in-2026-complete-well-known-ucp-setup-guide/)
+- [UCP Under The Hood: A Technical Deep Dive into Universal Commerce Protocol Architecture](https://ucphub.ai/ucp-technical-architecture-deep-dive-2026/)
+- [Building the Universal Commerce Protocol](https://shopify.engineering/ucp)

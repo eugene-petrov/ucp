@@ -12,6 +12,8 @@
                 comment="Quote Entity ID"/>
         <column xsi:type="varchar" name="masked_quote_id" nullable="false" length="32"
                 comment="Masked Quote ID"/>
+        <column xsi:type="varchar" name="platform_profile_uri" nullable="true" length="1024"
+                comment="Platform UCP Profile URI (from UCP-Agent header)"/>
         <column xsi:type="varchar" name="status" nullable="false" length="32" default="incomplete"
                 comment="Session Status"/>
         <column xsi:type="mediumtext" name="ucp_data" nullable="false"
@@ -41,6 +43,26 @@
         </index>
         <index referenceId="AEQET_UCP_CHECKOUT_SESSION_CREATED_AT" indexType="btree">
             <column name="created_at"/>
+        </index>
+    </table>
+
+    <table name="aeqet_ucp_webhook_delivery" resource="default" engine="innodb"
+           comment="UCP Webhook Delivery Attempts">
+        <column xsi:type="int" name="entity_id" unsigned="true" nullable="false" identity="true"/>
+        <column xsi:type="varchar" name="delivery_id" nullable="false" length="64"/>
+        <column xsi:type="varchar" name="target_url" nullable="false" length="1024" comment="Webhook target URL"/>
+        <column xsi:type="varchar" name="event_type" nullable="false" length="64"/>
+        <column xsi:type="mediumtext" name="payload" nullable="false"/>
+        <column xsi:type="varchar" name="status" nullable="false" length="20" default="pending"/>
+        <column xsi:type="smallint" name="attempts" unsigned="true" nullable="false" default="0"/>
+        <column xsi:type="datetime" name="next_retry_at" nullable="true"/>
+        <column xsi:type="text" name="last_error" nullable="true"/>
+        <column xsi:type="timestamp" name="created_at" on_update="false" nullable="false" default="CURRENT_TIMESTAMP"/>
+        <column xsi:type="timestamp" name="updated_at" on_update="true" nullable="false" default="CURRENT_TIMESTAMP"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY"><column name="entity_id"/></constraint>
+        <constraint xsi:type="unique" referenceId="AEQET_UCP_WEBHOOK_DLV_ID"><column name="delivery_id"/></constraint>
+        <index referenceId="AEQET_UCP_WEBHOOK_DLV_STATUS_RETRY" indexType="btree">
+            <column name="status"/><column name="next_retry_at"/>
         </index>
     </table>
 

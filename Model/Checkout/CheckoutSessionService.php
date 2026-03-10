@@ -11,9 +11,12 @@ use Aeqet\Ucp\Api\CheckoutSessionServiceInterface;
 use Aeqet\Ucp\Api\Data\AddressInterface;
 use Aeqet\Ucp\Api\Data\BuyerInterface;
 use Aeqet\Ucp\Api\Data\CheckoutSessionInterface;
+use Aeqet\Ucp\Model\ResourceModel\CheckoutSession as CheckoutSessionResource;
 use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Webapi\Rest\Request as RestRequest;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Quote\Api\CartRepositoryInterface;
+use Psr\Log\LoggerInterface;
 
 class CheckoutSessionService implements CheckoutSessionServiceInterface
 {
@@ -24,6 +27,9 @@ class CheckoutSessionService implements CheckoutSessionServiceInterface
      * @param CheckoutSessionSynchronizer $sessionSynchronizer
      * @param QuoteUpdater $quoteUpdater
      * @param CheckoutSessionCompleter $sessionCompleter
+     * @param RestRequest $request
+     * @param CheckoutSessionResource $sessionResource
+     * @param LoggerInterface $logger
      */
     public function __construct(
         private readonly QuoteResolver $quoteResolver,
@@ -32,6 +38,9 @@ class CheckoutSessionService implements CheckoutSessionServiceInterface
         private readonly CheckoutSessionSynchronizer $sessionSynchronizer,
         private readonly QuoteUpdater $quoteUpdater,
         private readonly CheckoutSessionCompleter $sessionCompleter,
+        private readonly RestRequest $request,
+        private readonly CheckoutSessionResource $sessionResource,
+        private readonly LoggerInterface $logger,
     ) {
     }
 
@@ -48,7 +57,22 @@ class CheckoutSessionService implements CheckoutSessionServiceInterface
             return $this->sessionRepository->get($existingSessionId);
         }
         [$quote, $maskedId] = $this->quoteResolver->resolveByCartId($cartId);
-        return $this->sessionSynchronizer->syncFromQuote($quote, $maskedId);
+        $session = $this->sessionSynchronizer->syncFromQuote($quote, $maskedId);
+
+        $ucpAgentHeader = $this->request->getHeader('UCP-Agent');
+        if ($ucpAgentHeader && preg_match('/\bprofile\s*=\s*"([^"]+)"/', $ucpAgentHeader, $m)) {
+            $profileUri = $m[1];
+            if (strncasecmp($profileUri, 'https://', 8) !== 0 || !filter_var($profileUri, FILTER_VALIDATE_URL)) {
+                $this->logger->warning(
+                    'UCP: invalid platform_profile_uri in UCP-Agent header',
+                    ['value' => $profileUri]
+                );
+            } else {
+                $this->sessionResource->savePlatformProfileUri($session->getId(), $profileUri);
+            }
+        }
+
+        return $session;
     }
 
     /**

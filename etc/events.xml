@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+
+    <event name="sales_order_place_after">
+        <observer name="aeqet_ucp_order_created"
+                  instance="Aeqet\Ucp\Observer\SalesOrderPlaceAfterObserver"/>
+    </event>
+
+    <event name="sales_order_save_after">
+        <observer name="aeqet_ucp_order_updated"
+                  instance="Aeqet\Ucp\Observer\SalesOrderSaveAfterObserver"/>
+    </event>
+
+    <event name="sales_shipment_save_after">
+        <observer name="aeqet_ucp_order_shipped"
+                  instance="Aeqet\Ucp\Observer\SalesShipmentSaveAfterObserver"/>
+    </event>
+
+    <event name="sales_order_cancel_after">
+        <observer name="aeqet_ucp_order_canceled"
+                  instance="Aeqet\Ucp\Observer\SalesOrderCancelAfterObserver"/>
+    </event>
+
+    <event name="sales_creditmemo_save_after">
+        <observer name="aeqet_ucp_order_refunded"
+                  instance="Aeqet\Ucp\Observer\SalesCreditmemoSaveAfterObserver"/>
+    </event>
+
+</config>

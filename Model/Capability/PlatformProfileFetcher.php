@@ -17,9 +17,9 @@ use Throwable;
 class PlatformProfileFetcher
 {
     /**
-     * @var array<string, string[]>
+     * @var array<string, array<mixed>|null>
      */
-    private array $cache = [];
+    private array $profileCache = [];
 
     /**
      * Constructor
@@ -36,6 +36,7 @@ class PlatformProfileFetcher
     /**
      * Fetch platform profile and return its capability names.
      *
+     * Delegates to fetchProfile so that a single HTTP request serves both callers (#6).
      * Returns [] on failure (fail-open).
      *
      * @param string $profileUri
@@ -43,26 +44,48 @@ class PlatformProfileFetcher
      */
     public function fetchCapabilityNames(string $profileUri): array
     {
-        if (isset($this->cache[$profileUri])) {
-            return $this->cache[$profileUri];
+        $profile = $this->fetchProfile($profileUri);
+        return $profile !== null ? array_keys($profile['ucp']['capabilities'] ?? []) : [];
+    }
+
+    /**
+     * Fetch raw platform profile JSON or null on failure (fail-open).
+     *
+     * @param string $profileUri
+     * @return array<mixed>|null
+     */
+    public function fetchProfile(string $profileUri): ?array
+    {
+        if (array_key_exists($profileUri, $this->profileCache)) {
+            return $this->profileCache[$profileUri];
         }
-        if (strncasecmp($profileUri, 'https://', 8) !== 0) {
-            $this->logger->warning('UCP: rejecting non-HTTPS platform profile URI', ['uri' => $profileUri]);
-            return [];
+        $data = $this->doFetch($profileUri);
+        $this->profileCache[$profileUri] = $data;
+        return $data;
+    }
+
+    /**
+     * Perform the HTTP fetch and JSON decode. Returns null on any failure.
+     *
+     * @param string $uri
+     * @return array<mixed>|null
+     */
+    private function doFetch(string $uri): ?array
+    {
+        if (strncasecmp($uri, 'https://', 8) !== 0) {
+            $this->logger->warning('UCP: rejecting non-HTTPS platform profile URI', ['uri' => $uri]);
+            return null;
         }
         try {
             $this->curl->setTimeout(3);
-            $this->curl->get($profileUri);
+            $this->curl->get($uri);
             $body = $this->curl->getBody();
-            $data = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
-            $names = array_keys($data['ucp']['capabilities'] ?? []);
+            return json_decode($body, true, 512, JSON_THROW_ON_ERROR);
         } catch (Throwable $e) {
             $this->logger->warning('UCP: failed to fetch platform profile', [
-                'uri' => $profileUri, 'error' => $e->getMessage()
+                'uri' => $uri, 'error' => $e->getMessage()
             ]);
-            $names = [];
+            return null;
         }
-        $this->cache[$profileUri] = $names;
-        return $names;
     }
 }
