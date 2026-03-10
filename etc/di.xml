@@ -83,6 +83,10 @@
     <preference for="Aeqet\Ucp\Api\Data\Webhook\SignatureResultInterface"
                 type="Aeqet\Ucp\Model\Data\Webhook\SignatureResult"/>
 
+    <!-- Webhook Delivery -->
+    <preference for="Aeqet\Ucp\Api\Data\Webhook\DeliveryInterface"
+                type="Aeqet\Ucp\Model\Data\Webhook\Delivery"/>
+
     <!-- Custom Logger for Aeqet_Ucp -->
     <virtualType name="Aeqet\Ucp\Logger\Handler" type="Magento\Framework\Logger\Handler\Base">
         <arguments>
@@ -164,6 +168,56 @@
             <argument name="logger" xsi:type="object">Aeqet\Ucp\Logger\Logger</argument>
         </arguments>
     </type>
+    <type name="Aeqet\Ucp\Model\Webhook\EventBuilder">
+        <arguments>
+            <argument name="logger" xsi:type="object">Aeqet\Ucp\Logger\Logger</argument>
+        </arguments>
+    </type>
+    <type name="Aeqet\Ucp\Model\Webhook\Dispatcher">
+        <arguments>
+            <argument name="logger" xsi:type="object">Aeqet\Ucp\Logger\Logger</argument>
+        </arguments>
+    </type>
+    <type name="Aeqet\Ucp\Model\Webhook\DeliveryProcessor">
+        <arguments>
+            <argument name="logger" xsi:type="object">Aeqet\Ucp\Logger\Logger</argument>
+        </arguments>
+    </type>
+    <type name="Aeqet\Ucp\Cron\ProcessWebhookDeliveries">
+        <arguments>
+            <argument name="logger" xsi:type="object">Aeqet\Ucp\Logger\Logger</argument>
+        </arguments>
+    </type>
+    <type name="Aeqet\Ucp\Console\Command\RetryWebhooksCommand">
+        <arguments>
+            <argument name="logger" xsi:type="object">Aeqet\Ucp\Logger\Logger</argument>
+        </arguments>
+    </type>
+    <type name="Aeqet\Ucp\Observer\SalesOrderPlaceAfterObserver">
+        <arguments>
+            <argument name="logger" xsi:type="object">Aeqet\Ucp\Logger\Logger</argument>
+        </arguments>
+    </type>
+    <type name="Aeqet\Ucp\Observer\SalesOrderSaveAfterObserver">
+        <arguments>
+            <argument name="logger" xsi:type="object">Aeqet\Ucp\Logger\Logger</argument>
+        </arguments>
+    </type>
+    <type name="Aeqet\Ucp\Observer\SalesShipmentSaveAfterObserver">
+        <arguments>
+            <argument name="logger" xsi:type="object">Aeqet\Ucp\Logger\Logger</argument>
+        </arguments>
+    </type>
+    <type name="Aeqet\Ucp\Observer\SalesOrderCancelAfterObserver">
+        <arguments>
+            <argument name="logger" xsi:type="object">Aeqet\Ucp\Logger\Logger</argument>
+        </arguments>
+    </type>
+    <type name="Aeqet\Ucp\Observer\SalesCreditmemoSaveAfterObserver">
+        <arguments>
+            <argument name="logger" xsi:type="object">Aeqet\Ucp\Logger\Logger</argument>
+        </arguments>
+    </type>
 
     <!-- Console Commands -->
     <type name="Magento\Framework\Console\CommandListInterface">
@@ -174,6 +228,9 @@
                 </item>
                 <item name="ucp_keys_generate" xsi:type="object">
                     Aeqet\Ucp\Console\Command\GenerateSigningKeysCommand
+                </item>
+                <item name="ucp_webhooks_retry" xsi:type="object">
+                    Aeqet\Ucp\Console\Command\RetryWebhooksCommand
                 </item>
             </argument>
         </arguments>

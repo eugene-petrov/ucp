@@ -8,7 +8,6 @@ declare(strict_types=1);
 namespace Aeqet\Ucp\Model\ResourceModel;
 
 use Magento\Framework\Model\ResourceModel\Db\AbstractDb;
-use Magento\Framework\Model\ResourceModel\Db\Context;
 
 class CheckoutSession extends AbstractDb
 {
@@ -71,5 +70,41 @@ class CheckoutSession extends AbstractDb
 
         $result = $connection->fetchOne($select);
         return $result ?: null;
+    }
+
+    /**
+     * Save platform profile URI for a session
+     *
+     * @param string $sessionId
+     * @param string $uri
+     * @return void
+     */
+    public function savePlatformProfileUri(string $sessionId, string $uri): void
+    {
+        $this->getConnection()->update(
+            $this->getMainTable(),
+            ['platform_profile_uri' => $uri],
+            ['session_id = ?' => $sessionId]
+        );
+    }
+
+    /**
+     * Fetch session_id and platform_profile_uri in a single query by quote_id.
+     *
+     * Returns ['session_id' => string, 'platform_profile_uri' => string|null] or null if no session exists.
+     *
+     * @param int $quoteId
+     * @return array{session_id: string, platform_profile_uri: string|null}|null
+     */
+    public function getSessionDataByQuoteId(int $quoteId): ?array
+    {
+        $connection = $this->getConnection();
+        $select = $connection->select()
+            ->from($this->getMainTable(), ['session_id', 'platform_profile_uri'])
+            ->where('quote_id = ?', $quoteId)
+            ->limit(1);
+
+        $row = $connection->fetchRow($select);
+        return $row ?: null;
     }
 }

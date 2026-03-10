@@ -11,12 +11,15 @@ use Aeqet\Ucp\Model\Checkout\CheckoutSessionService;
 use Aeqet\Ucp\Model\Checkout\CheckoutSessionSynchronizer;
 use Aeqet\Ucp\Model\Checkout\QuoteResolver;
 use Aeqet\Ucp\Model\Checkout\QuoteUpdater;
+use Aeqet\Ucp\Model\ResourceModel\CheckoutSession as CheckoutSessionResource;
 use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Webapi\Rest\Request as RestRequest;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Quote\Api\CartRepositoryInterface;
 use Magento\Quote\Api\Data\CartInterface;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Psr\Log\LoggerInterface;
 
 class CheckoutSessionServiceTest extends TestCase
 {
@@ -26,6 +29,9 @@ class CheckoutSessionServiceTest extends TestCase
     private CheckoutSessionSynchronizer&MockObject $sessionSynchronizer;
     private QuoteUpdater&MockObject $quoteUpdater;
     private CheckoutSessionCompleter&MockObject $sessionCompleter;
+    private RestRequest&MockObject $request;
+    private CheckoutSessionResource&MockObject $sessionResource;
+    private LoggerInterface&MockObject $logger;
     private CheckoutSessionService $management;
 
     protected function setUp(): void
@@ -36,6 +42,9 @@ class CheckoutSessionServiceTest extends TestCase
         $this->sessionSynchronizer = $this->createMock(CheckoutSessionSynchronizer::class);
         $this->quoteUpdater = $this->createMock(QuoteUpdater::class);
         $this->sessionCompleter = $this->createMock(CheckoutSessionCompleter::class);
+        $this->request = $this->createMock(RestRequest::class);
+        $this->sessionResource = $this->createMock(CheckoutSessionResource::class);
+        $this->logger = $this->createMock(LoggerInterface::class);
 
         $this->management = new CheckoutSessionService(
             $this->quoteResolver,
@@ -44,6 +53,9 @@ class CheckoutSessionServiceTest extends TestCase
             $this->sessionSynchronizer,
             $this->quoteUpdater,
             $this->sessionCompleter,
+            $this->request,
+            $this->sessionResource,
+            $this->logger,
         );
     }
 
