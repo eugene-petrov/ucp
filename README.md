@@ -153,7 +153,7 @@ The public key will be included in the `signing_keys` array of the UCP manifest 
 
 ---
 
-## TODO - Roadmap to Full UCP Compliance
+## TODO - Roadmap
 
 This section documents what remains to fully implement the Universal Commerce Protocol for Magento 2.
 
@@ -194,14 +194,6 @@ This section documents what remains to fully implement the Universal Commerce Pr
   - Support for currency in manifest
 
 ### Low Priority
-
-- [ ] **MCP Transport Binding**
-  - Alternative transport using Model Context Protocol
-  - Support for AI agent integration
-
-- [ ] **A2A Transport Binding**
-  - Agent-to-Agent protocol support
-  - Async message handling
 
 - [ ] **Multi-Website/Store Support**
   - Add `--store=code` option to generate manifest for specific store view
