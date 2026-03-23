@@ -177,11 +177,13 @@ class QuoteUpdaterTest extends TestCase
      */
     private function makeQuoteMock(): Quote&MockObject
     {
-        return $this->getMockBuilder(Quote::class)
+        $mock = $this->getMockBuilder(Quote::class)
             ->disableOriginalConstructor()
-            ->onlyMethods(['getBillingAddress', 'getShippingAddress'])
+            ->onlyMethods(['getBillingAddress', 'getShippingAddress', 'getExtensionAttributes'])
             ->addMethods(['setCustomerEmail', 'setCustomerFirstname', 'setCustomerLastname'])
             ->getMock();
+        $mock->method('getExtensionAttributes')->willReturn(null);
+        return $mock;
     }
 
     /** QuoteAddress mock — setCollectShippingRates/setSameAsBilling are magic (not configurable) */
