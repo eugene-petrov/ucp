@@ -11,8 +11,6 @@ use Aeqet\Ucp\Model\Checkout\CheckoutSessionRepository;
 use Aeqet\Ucp\Model\Checkout\OrderPlacer;
 use Aeqet\Ucp\Model\Config\Config;
 use Magento\Framework\Exception\LocalizedException;
-use Magento\Quote\Api\CartRepositoryInterface;
-use Magento\Quote\Api\Data\PaymentInterface;
 use Magento\Quote\Model\Quote;
 use Magento\Quote\Model\Quote\Address as QuoteAddress;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -23,7 +21,6 @@ use RuntimeException;
 class CheckoutSessionCompleterTest extends TestCase
 {
     private OrderPlacer&MockObject $orderPlacer;
-    private CartRepositoryInterface&MockObject $cartRepository;
     private CheckoutSessionRepository&MockObject $sessionRepository;
     private Config&MockObject $config;
     private LoggerInterface&MockObject $logger;
@@ -32,14 +29,12 @@ class CheckoutSessionCompleterTest extends TestCase
     protected function setUp(): void
     {
         $this->orderPlacer = $this->createMock(OrderPlacer::class);
-        $this->cartRepository = $this->createMock(CartRepositoryInterface::class);
         $this->sessionRepository = $this->createMock(CheckoutSessionRepository::class);
         $this->config = $this->createMock(Config::class);
         $this->logger = $this->createMock(LoggerInterface::class);
 
         $this->completer = new CheckoutSessionCompleter(
             $this->orderPlacer,
-            $this->cartRepository,
             $this->sessionRepository,
             $this->config,
             $this->logger
@@ -55,16 +50,11 @@ class CheckoutSessionCompleterTest extends TestCase
 
         $confirmation = $this->createMock(OrderConfirmationInterface::class);
 
-        $payment = $this->createMock(PaymentInterface::class);
-        $payment->expects($this->once())->method('setMethod')->with('checkmo');
-
         $quote = $this->makeQuoteMock();
         $quote->method('getId')->willReturn('10');
-        $quote->method('getPayment')->willReturn($payment);
 
         $this->config->method('getDefaultPaymentMethod')->willReturn('checkmo');
-        $this->cartRepository->expects($this->once())->method('save')->with($quote);
-        $this->orderPlacer->expects($this->once())->method('place')->with(10)->willReturn($confirmation);
+        $this->orderPlacer->expects($this->once())->method('place')->with(10, 'checkmo')->willReturn($confirmation);
 
         $session->expects($this->once())->method('setStatus')->with(CheckoutSessionInterface::STATUS_COMPLETED);
         $session->expects($this->once())->method('setOrder')->with($confirmation);
@@ -125,10 +115,8 @@ class CheckoutSessionCompleterTest extends TestCase
         $session = $this->createMock(CheckoutSessionInterface::class);
         $session->method('getStatus')->willReturn(CheckoutSessionInterface::STATUS_READY_FOR_COMPLETE);
 
-        $payment = $this->createMock(PaymentInterface::class);
         $quote = $this->makeQuoteMock();
         $quote->method('getId')->willReturn('5');
-        $quote->method('getPayment')->willReturn($payment);
 
         $this->config->method('getDefaultPaymentMethod')->willReturn('checkmo');
         $this->orderPlacer->method('place')->willThrowException(new RuntimeException('DB error'));
@@ -169,7 +157,7 @@ class CheckoutSessionCompleterTest extends TestCase
     {
         return $this->getMockBuilder(Quote::class)
             ->disableOriginalConstructor()
-            ->onlyMethods(['getBillingAddress', 'getShippingAddress', 'getPayment', 'isVirtual', 'getId'])
+            ->onlyMethods(['getBillingAddress', 'getShippingAddress', 'isVirtual', 'getId'])
             ->addMethods(['getCustomerEmail'])
             ->getMock();
     }

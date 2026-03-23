@@ -11,6 +11,7 @@ use Aeqet\Ucp\Api\Data\OrderConfirmationInterface;
 use Aeqet\Ucp\Api\Data\OrderConfirmationInterfaceFactory;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Quote\Api\CartManagementInterface;
+use Magento\Quote\Api\Data\PaymentInterfaceFactory;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Store\Model\StoreManagerInterface;
 
@@ -21,12 +22,14 @@ class OrderPlacer
      * @param OrderRepositoryInterface $orderRepository
      * @param OrderConfirmationInterfaceFactory $orderConfirmationFactory
      * @param StoreManagerInterface $storeManager
+     * @param PaymentInterfaceFactory $paymentFactory
      */
     public function __construct(
         private readonly CartManagementInterface $cartManagement,
         private readonly OrderRepositoryInterface $orderRepository,
         private readonly OrderConfirmationInterfaceFactory $orderConfirmationFactory,
-        private readonly StoreManagerInterface $storeManager
+        private readonly StoreManagerInterface $storeManager,
+        private readonly PaymentInterfaceFactory $paymentFactory
     ) {
     }
 
@@ -34,12 +37,15 @@ class OrderPlacer
      * Place an order for the given quote ID and return an OrderConfirmation.
      *
      * @param int $quoteId
+     * @param string $paymentMethod
      * @return OrderConfirmationInterface
      * @throws LocalizedException
      */
-    public function place(int $quoteId): OrderConfirmationInterface
+    public function place(int $quoteId, string $paymentMethod): OrderConfirmationInterface
     {
-        $orderId = $this->cartManagement->placeOrder($quoteId);
+        $payment = $this->paymentFactory->create();
+        $payment->setMethod($paymentMethod);
+        $orderId = $this->cartManagement->placeOrder($quoteId, $payment);
         $order = $this->orderRepository->get($orderId);
 
         $confirmation = $this->orderConfirmationFactory->create();

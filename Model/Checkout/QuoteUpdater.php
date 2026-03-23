@@ -127,6 +127,15 @@ class QuoteUpdater
             );
         }
         $shippingAddress->setShippingMethod($shippingMethod);
+
+        // Keep the shipping assignment in sync so ShippingMethodManagement::apply() fires during save
+        $extensionAttributes = $quote->getExtensionAttributes();
+        if ($extensionAttributes !== null) {
+            $assignments = $extensionAttributes->getShippingAssignments() ?? [];
+            if (!empty($assignments)) {
+                $assignments[0]->getShipping()->setMethod($shippingMethod);
+            }
+        }
     }
 
     /**

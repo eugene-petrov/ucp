@@ -12,7 +12,6 @@ use Aeqet\Ucp\Api\Data\OrderConfirmationInterface;
 use Aeqet\Ucp\Model\Config\Config;
 use Exception;
 use Magento\Framework\Exception\LocalizedException;
-use Magento\Quote\Api\CartRepositoryInterface;
 use Magento\Quote\Api\Data\CartInterface;
 use Psr\Log\LoggerInterface;
 
@@ -20,14 +19,12 @@ class CheckoutSessionCompleter
 {
     /**
      * @param OrderPlacer $orderPlacer
-     * @param CartRepositoryInterface $cartRepository
      * @param CheckoutSessionRepository $sessionRepository
      * @param Config $config
      * @param LoggerInterface $logger
      */
     public function __construct(
         private readonly OrderPlacer $orderPlacer,
-        private readonly CartRepositoryInterface $cartRepository,
         private readonly CheckoutSessionRepository $sessionRepository,
         private readonly Config $config,
         private readonly LoggerInterface $logger
@@ -53,10 +50,8 @@ class CheckoutSessionCompleter
         if ($session->getStatus() !== CheckoutSessionInterface::STATUS_READY_FOR_COMPLETE) {
             $this->assertQuoteReadyForComplete($quote); // always throws
         }
-        $quote->getPayment()->setMethod($this->config->getDefaultPaymentMethod());
-        $this->cartRepository->save($quote);
         try {
-            $confirmation = $this->orderPlacer->place((int) $quote->getId());
+            $confirmation = $this->orderPlacer->place((int) $quote->getId(), $this->config->getDefaultPaymentMethod());
             return $this->markSessionCompleted($session, $confirmation, $maskedId);
         } catch (Exception $e) {
             $this->logger->error('Failed to complete checkout', [

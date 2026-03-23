@@ -8,6 +8,8 @@ use Aeqet\Ucp\Api\Data\OrderConfirmationInterfaceFactory;
 use Aeqet\Ucp\Model\Checkout\OrderPlacer;
 use Aeqet\Ucp\Model\Data\OrderConfirmation;
 use Magento\Quote\Api\CartManagementInterface;
+use Magento\Quote\Api\Data\PaymentInterface;
+use Magento\Quote\Api\Data\PaymentInterfaceFactory;
 use Magento\Sales\Api\Data\OrderInterface;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Store\Model\Store;
@@ -21,6 +23,7 @@ class OrderPlacerTest extends TestCase
     private OrderRepositoryInterface&MockObject $orderRepository;
     private OrderConfirmationInterfaceFactory&MockObject $confirmationFactory;
     private StoreManagerInterface&MockObject $storeManager;
+    private PaymentInterfaceFactory&MockObject $paymentFactory;
     private OrderPlacer $placer;
 
     protected function setUp(): void
@@ -29,15 +32,20 @@ class OrderPlacerTest extends TestCase
         $this->orderRepository = $this->createMock(OrderRepositoryInterface::class);
         $this->confirmationFactory = $this->createMock(OrderConfirmationInterfaceFactory::class);
         $this->storeManager = $this->createMock(StoreManagerInterface::class);
+        $this->paymentFactory = $this->createMock(PaymentInterfaceFactory::class);
 
         $this->confirmationFactory->method('create')
             ->willReturnCallback(static fn(array $data = []) => new OrderConfirmation($data));
+
+        $this->paymentFactory->method('create')
+            ->willReturn($this->createMock(PaymentInterface::class));
 
         $this->placer = new OrderPlacer(
             $this->cartManagement,
             $this->orderRepository,
             $this->confirmationFactory,
-            $this->storeManager
+            $this->storeManager,
+            $this->paymentFactory
         );
     }
 
@@ -45,7 +53,7 @@ class OrderPlacerTest extends TestCase
     {
         $this->setupMocks(quoteId: 10, orderId: 55, incrementId: '000000055', entityId: 55);
 
-        $confirmation = $this->placer->place(10);
+        $confirmation = $this->placer->place(10, 'checkmo');
 
         $this->assertSame('000000055', $confirmation->getId());
     }
@@ -54,7 +62,7 @@ class OrderPlacerTest extends TestCase
     {
         $this->setupMocks(quoteId: 10, orderId: 55, incrementId: '000000055', entityId: 55);
 
-        $confirmation = $this->placer->place(10);
+        $confirmation = $this->placer->place(10, 'checkmo');
 
         $this->assertSame(
             'https://example.com/sales/order/view/order_id/55',
@@ -66,20 +74,22 @@ class OrderPlacerTest extends TestCase
     {
         $this->cartManagement->expects($this->once())
             ->method('placeOrder')
-            ->with(7)
+            ->with(7, $this->isInstanceOf(PaymentInterface::class))
             ->willReturn(99);
 
         $this->setupOrderMocks(orderId: 99, incrementId: '000000099', entityId: 99);
         $this->setupStoreMock();
 
-        $this->placer->place(7);
+        $this->placer->place(7, 'checkmo');
     }
 
     // ---- helpers ----
 
     private function setupMocks(int $quoteId, int $orderId, string $incrementId, int $entityId): void
     {
-        $this->cartManagement->method('placeOrder')->with($quoteId)->willReturn($orderId);
+        $this->cartManagement->method('placeOrder')
+            ->with($quoteId, $this->isInstanceOf(PaymentInterface::class))
+            ->willReturn($orderId);
         $this->setupOrderMocks($orderId, $incrementId, $entityId);
         $this->setupStoreMock();
     }
