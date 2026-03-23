@@ -581,7 +581,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"productId\": \"{{catalog_product_id}}\",\n    \"quantity\": 2\n}"
+							"raw": "{\n    \"product_id\": \"{{catalog_product_id}}\",\n    \"quantity\": 2\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/rest/V1/ucp/cart/{{ucp_cart_id}}/items",
@@ -899,7 +899,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"productId\": \"{{agent_product_id}}\",\n    \"quantity\": 1\n}"
+							"raw": "{\n    \"product_id\": \"{{agent_product_id}}\",\n    \"quantity\": 1\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/rest/V1/ucp/cart/{{agent_cart_id}}/items",
@@ -975,7 +975,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"cartId\": \"{{agent_cart_masked_id}}\"\n}"
+							"raw": "{\n    \"cart_id\": \"{{agent_cart_masked_id}}\"\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/rest/V1/ucp/checkout",
@@ -1044,7 +1044,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"buyer\": {\n        \"firstName\": \"AI\",\n        \"lastName\": \"Agent\",\n        \"email\": \"ai.agent@example.com\",\n        \"phoneNumber\": \"+14155551234\"\n    },\n    \"fulfillmentAddress\": {\n        \"firstName\": \"AI\",\n        \"lastName\": \"Agent\",\n        \"streetLine1\": \"123 AI Street\",\n        \"city\": \"San Francisco\",\n        \"state\": \"CA\",\n        \"postalCode\": \"94105\",\n        \"countryCode\": \"US\",\n        \"phone\": \"+14155551234\"\n    }\n}"
+							"raw": "{\n    \"buyer\": {\n        \"first_name\": \"AI\",\n        \"last_name\": \"Agent\",\n        \"email\": \"ai.agent@example.com\",\n        \"phone_number\": \"+14155551234\"\n    },\n    \"fulfillment_address\": {\n        \"first_name\": \"AI\",\n        \"last_name\": \"Agent\",\n        \"street_line1\": \"123 AI Street\",\n        \"city\": \"San Francisco\",\n        \"state\": \"CA\",\n        \"postal_code\": \"94105\",\n        \"country_code\": \"US\",\n        \"phone\": \"+14155551234\"\n    }\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/rest/V1/ucp/checkout/{{agent_ucp_session_id}}",
@@ -1106,7 +1106,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"selectedFulfillmentId\": \"{{agent_fulfillment_id}}\"\n}"
+							"raw": "{\n    \"selected_fulfillment_id\": \"{{agent_fulfillment_id}}\"\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/rest/V1/ucp/checkout/{{agent_ucp_session_id}}",
