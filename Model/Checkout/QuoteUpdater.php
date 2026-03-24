@@ -9,11 +9,17 @@ namespace Aeqet\Ucp\Model\Checkout;
 
 use Aeqet\Ucp\Api\Data\AddressInterface;
 use Aeqet\Ucp\Api\Data\BuyerInterface;
+use Magento\Directory\Model\RegionFactory;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Quote\Api\Data\CartInterface;
 
 class QuoteUpdater
 {
+    public function __construct(
+        private readonly RegionFactory $regionFactory
+    ) {
+    }
+
     /**
      * Apply all pending updates (buyer, address, shipping) to the quote.
      *
@@ -91,6 +97,10 @@ class QuoteUpdater
         $shipping->setStreet(array_values(array_filter([$addr->getStreetLine1(), $addr->getStreetLine2()])));
         $shipping->setCity($addr->getCity() ?? '');
         $shipping->setRegion($addr->getState() ?? '');
+        $regionId = $this->resolveRegionId($addr->getState(), $addr->getCountryCode());
+        if ($regionId !== null) {
+            $shipping->setRegionId($regionId);
+        }
         $shipping->setPostcode($addr->getPostalCode() ?? '');
         $shipping->setCountryId($addr->getCountryCode() ?? '');
         if ($addr->getPhone()) {
@@ -150,7 +160,28 @@ class QuoteUpdater
         $billing->setStreet(array_values(array_filter([$addr->getStreetLine1(), $addr->getStreetLine2()])));
         $billing->setCity($addr->getCity() ?? '');
         $billing->setRegion($addr->getState() ?? '');
+        $regionId = $this->resolveRegionId($addr->getState(), $addr->getCountryCode());
+        if ($regionId !== null) {
+            $billing->setRegionId($regionId);
+        }
         $billing->setPostcode($addr->getPostalCode() ?? '');
         $billing->setCountryId($addr->getCountryCode() ?? '');
+    }
+
+    /**
+     * Look up Magento's numeric region ID from a state code or name + country.
+     * Tries code first ("IL"), then full name ("Illinois"). Returns null if not found.
+     */
+    private function resolveRegionId(?string $state, ?string $countryCode): ?int
+    {
+        if (!$state || !$countryCode) {
+            return null;
+        }
+        $region = $this->regionFactory->create();
+        $region->loadByCode($state, $countryCode);
+        if (!$region->getId()) {
+            $region->loadByName($state, $countryCode);
+        }
+        return $region->getId() ? (int) $region->getId() : null;
     }
 }

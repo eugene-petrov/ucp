@@ -53,6 +53,14 @@ class CheckoutSessionCompleter
         try {
             $confirmation = $this->orderPlacer->place((int) $quote->getId(), $this->config->getDefaultPaymentMethod());
             return $this->markSessionCompleted($session, $confirmation, $maskedId);
+        } catch (LocalizedException $e) {
+            $this->logger->error('Failed to complete checkout', [
+                'session_id' => $sessionId,
+                'quote_id' => $quote->getId(),
+                'exception' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            throw $e;
         } catch (Exception $e) {
             $this->logger->error('Failed to complete checkout', [
                 'session_id' => $sessionId,
