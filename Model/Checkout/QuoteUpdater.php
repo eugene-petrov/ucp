@@ -15,6 +15,9 @@ use Magento\Quote\Api\Data\CartInterface;
 
 class QuoteUpdater
 {
+    /**
+     * @param RegionFactory $regionFactory
+     */
     public function __construct(
         private readonly RegionFactory $regionFactory
     ) {
@@ -170,7 +173,12 @@ class QuoteUpdater
 
     /**
      * Look up Magento's numeric region ID from a state code or name + country.
+     *
      * Tries code first ("IL"), then full name ("Illinois"). Returns null if not found.
+     *
+     * @param string|null $state
+     * @param string|null $countryCode
+     * @return int|null
      */
     private function resolveRegionId(?string $state, ?string $countryCode): ?int
     {
