@@ -7,6 +7,8 @@ namespace Aeqet\Ucp\Tests\Unit\Model\Checkout;
 use Aeqet\Ucp\Api\Data\AddressInterface;
 use Aeqet\Ucp\Api\Data\BuyerInterface;
 use Aeqet\Ucp\Model\Checkout\QuoteUpdater;
+use Magento\Directory\Model\Region;
+use Magento\Directory\Model\RegionFactory;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Quote\Model\Quote;
 use Magento\Quote\Model\Quote\Address as QuoteAddress;
@@ -16,11 +18,25 @@ use PHPUnit\Framework\TestCase;
 
 class QuoteUpdaterTest extends TestCase
 {
+    private RegionFactory&MockObject $regionFactory;
     private QuoteUpdater $updater;
 
     protected function setUp(): void
     {
-        $this->updater = new QuoteUpdater();
+        $this->regionFactory = $this->createMock(RegionFactory::class);
+        $this->updater = new QuoteUpdater($this->regionFactory);
+    }
+
+    private function makeRegionMock(?int $id): Region&MockObject
+    {
+        $region = $this->getMockBuilder(Region::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['loadByCode', 'loadByName', 'getId'])
+            ->getMock();
+        $region->method('loadByCode')->willReturnSelf();
+        $region->method('loadByName')->willReturnSelf();
+        $region->method('getId')->willReturn($id);
+        return $region;
     }
 
     // --- buyer ---
@@ -76,12 +92,15 @@ class QuoteUpdaterTest extends TestCase
         $addr->method('getCountryCode')->willReturn('US');
         $addr->method('getPhone')->willReturn('555-9999');
 
+        $this->regionFactory->method('create')->willReturn($this->makeRegionMock(23));
+
         $shipping = $this->makeAddressMock();
         $shipping->expects($this->once())->method('setFirstname')->with('Jane');
         $shipping->expects($this->once())->method('setLastname')->with('Smith');
         $shipping->expects($this->once())->method('setStreet')->with(['123 Main St']);
         $shipping->expects($this->once())->method('setCity')->with('Springfield');
         $shipping->expects($this->once())->method('setRegion')->with('IL');
+        $shipping->expects($this->once())->method('setRegionId')->with(23);
         $shipping->expects($this->once())->method('setPostcode')->with('62701');
         $shipping->expects($this->once())->method('setCountryId')->with('US');
         $shipping->expects($this->once())->method('setTelephone')->with('555-9999');
@@ -89,6 +108,34 @@ class QuoteUpdaterTest extends TestCase
         // billing already has a street → no copy
         $billing = $this->makeAddressMock();
         $billing->method('getStreetLine')->with(1)->willReturn('existing street');
+
+        $quote = $this->makeQuoteMock();
+        $quote->method('getShippingAddress')->willReturn($shipping);
+        $quote->method('getBillingAddress')->willReturn($billing);
+
+        $this->updater->apply($quote, null, $addr, null);
+    }
+
+    public function testApplyFulfillmentAddressSkipsRegionIdWhenNotFound(): void
+    {
+        $addr = $this->createMock(AddressInterface::class);
+        $addr->method('getFirstName')->willReturn('Jane');
+        $addr->method('getLastName')->willReturn('Smith');
+        $addr->method('getStreetLine1')->willReturn('1 Test St');
+        $addr->method('getStreetLine2')->willReturn(null);
+        $addr->method('getCity')->willReturn('Unknown City');
+        $addr->method('getState')->willReturn('XX');
+        $addr->method('getPostalCode')->willReturn('00000');
+        $addr->method('getCountryCode')->willReturn('US');
+        $addr->method('getPhone')->willReturn(null);
+
+        $this->regionFactory->method('create')->willReturn($this->makeRegionMock(null));
+
+        $shipping = $this->makeAddressMock();
+        $shipping->expects($this->never())->method('setRegionId');
+
+        $billing = $this->makeAddressMock();
+        $billing->method('getStreetLine')->with(1)->willReturn('existing');
 
         $quote = $this->makeQuoteMock();
         $quote->method('getShippingAddress')->willReturn($shipping);
@@ -109,6 +156,8 @@ class QuoteUpdaterTest extends TestCase
         $addr->method('getPostalCode')->willReturn('97201');
         $addr->method('getCountryCode')->willReturn('US');
         $addr->method('getPhone')->willReturn(null);
+
+        $this->regionFactory->method('create')->willReturn($this->makeRegionMock(49));
 
         $shipping = $this->makeAddressMock();
 
@@ -193,7 +242,7 @@ class QuoteUpdaterTest extends TestCase
             ->disableOriginalConstructor()
             ->onlyMethods([
                 'setEmail', 'setFirstname', 'setLastname', 'setTelephone',
-                'setStreet', 'setCity', 'setRegion', 'setPostcode', 'setCountryId',
+                'setStreet', 'setCity', 'setRegion', 'setRegionId', 'setPostcode', 'setCountryId',
                 'getAllShippingRates', 'getStreetLine', 'collectShippingRates',
                 'setSameAsBilling',
             ])

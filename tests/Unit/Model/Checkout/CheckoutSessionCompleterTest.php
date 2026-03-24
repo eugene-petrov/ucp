@@ -129,6 +129,27 @@ class CheckoutSessionCompleterTest extends TestCase
         $this->completer->complete($session, $quote, 'masked1', 'sess1');
     }
 
+    public function testCompleteRethrowsLocalizedException_withOriginalMessage(): void
+    {
+        $session = $this->createMock(CheckoutSessionInterface::class);
+        $session->method('getStatus')->willReturn(CheckoutSessionInterface::STATUS_READY_FOR_COMPLETE);
+
+        $quote = $this->makeQuoteMock();
+        $quote->method('getId')->willReturn('7');
+
+        $this->config->method('getDefaultPaymentMethod')->willReturn('checkmo');
+        $this->orderPlacer->method('place')->willThrowException(
+            new LocalizedException(__('The region is required.'))
+        );
+
+        $this->logger->expects($this->once())->method('error');
+
+        $this->expectException(LocalizedException::class);
+        $this->expectExceptionMessage('The region is required.');
+
+        $this->completer->complete($session, $quote, 'masked1', 'sess1');
+    }
+
     // --- virtual quote ---
 
     public function testCompleteThrowsForVirtualQuoteWhenEmailAndBillingMissing(): void
